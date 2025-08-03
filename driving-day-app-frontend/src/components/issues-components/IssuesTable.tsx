@@ -166,32 +166,23 @@ export default function IssueTable() {
       </FiltersBase>
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <table className="w-full font-face table-fixed">
-          <colgroup>
-            <col style={{ width: "10%" }} />
-            <col style={{ width: "10%" }} />
-            <col style={{ width: "10%" }} />
-            <col style={{ width: "15%" }} />
-            <col style={{ width: "10%" }} />
-            <col style={{ width: "8%" }} />
-            <col style={{ width: "15%" }} />
-          </colgroup>
+        <table className="w-full font-face">
           <thead>
             <tr className="border-b border-gray-100">
-              <th className="px-6 py-4 text-left font-medium text-lg">
+              <th className="px-3 md:px-6 py-3 md:py-4 text-left font-medium text-sm md:text-lg">
                 Issue #
               </th>
-              <th className="px-6 py-4 text-left font-medium hidden sm:table-cell">Driver</th>
-              <th className="px-6 py-4 text-left font-medium">Date</th>
-              <th className="px-6 py-4 text-left font-medium">Synopsis</th>
-              <th className="px-6 py-4 text-left font-medium hidden sm:table-cell">Subsystems</th>
-              <th className="px-6 py-4 text-left font-medium">Priority</th>
-              <th className="px-6 py-4 text-left font-medium">
+              <th className="px-3 md:px-6 py-3 md:py-4 text-left font-medium text-sm md:text-base hidden md:table-cell">Driver</th>
+              <th className="px-3 md:px-6 py-3 md:py-4 text-left font-medium text-sm md:text-base">Date</th>
+              <th className="px-3 md:px-6 py-3 md:py-4 text-left font-medium text-sm md:text-base">Synopsis</th>
+              <th className="px-3 md:px-6 py-3 md:py-4 text-left font-medium text-sm md:text-base hidden lg:table-cell">Subsystems</th>
+              <th className="px-3 md:px-6 py-3 md:py-4 text-left font-medium text-sm md:text-base hidden sm:table-cell">Priority</th>
+              <th className="px-3 md:px-6 py-3 md:py-4 text-left font-medium text-sm md:text-base">
                 <div className="flex items-center justify-between">
                   <span>Status</span>
                   <button
                     onClick={() => setIsAddModalOpen(true)}
-                    className="ml-4 bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 focus:outline-none"
+                    className="ml-2 md:ml-4 bg-blue-500 text-white px-2 md:px-3 py-1 rounded-md text-xs md:text-sm hover:bg-blue-600 focus:outline-none"
                   >
                     Add
                   </button>
@@ -217,29 +208,29 @@ export default function IssueTable() {
                 tabIndex={0}
               >
                 {/* Issue # */}
-                <td className="px-6 py-4 sm:py-3 text-lg font-medium">
+                <td className="px-3 md:px-6 py-3 md:py-4 text-sm md:text-lg font-medium">
                   {issue.issue_number}
                 </td>
 
-                {/* Driver (hidden on xs) */}
-                <td className="hidden sm:table-cell px-6 py-4 sm:py-3 text-gray-600">
+                {/* Driver (hidden on mobile) */}
+                <td className="hidden md:table-cell px-3 md:px-6 py-3 md:py-4 text-sm md:text-base text-gray-600">
                   <div className="break-words">{issue.driver}</div>
                 </td>
 
                 {/* Date */}
-                <td className="px-6 py-4 sm:py-3 text-gray-600 whitespace-nowrap">
+                <td className="px-3 md:px-6 py-3 md:py-4 text-sm md:text-base text-gray-600 whitespace-nowrap">
                   {issue.date}
                 </td>
 
                 {/* Synopsis */}
-                <td className="px-6 py-4 sm:py-3">
+                <td className="px-3 md:px-6 py-3 md:py-4 text-sm md:text-base">
                   <div className="font-medium break-words">
                     {issue.synopsis}
                   </div>
                 </td>
 
-                {/* Subsystems (hidden on xs) */}
-                <td className="hidden sm:table-cell px-6 py-4 sm:py-3">
+                {/* Subsystems (hidden on mobile and tablet) */}
+                <td className="hidden lg:table-cell px-3 md:px-6 py-3 md:py-4 text-sm md:text-base">
                   <div className="flex flex-wrap gap-1">
                     {issue.subsystems.length > 0 ? (
                       issue.subsystems.map((subsystem) => (
@@ -256,8 +247,8 @@ export default function IssueTable() {
                   </div>
                 </td>
 
-                {/* Priority */}
-                <td className="hidden md:table-cell px-6 py-4 sm:py-3">
+                {/* Priority (hidden on mobile) */}
+                <td className="hidden sm:table-cell px-3 md:px-6 py-3 md:py-4 text-sm md:text-base">
                   <span
                     className={`text-xs font-medium px-2.5 py-0.5 rounded ${getPriorityColor(
                       issue.priority
@@ -267,8 +258,8 @@ export default function IssueTable() {
                   </span>
                 </td>
 
-                {/* Status (wider) */}
-                <td className="px-6 py-4 sm:py-3 w-32 sm:w-40">
+                {/* Status */}
+                <td className="px-3 md:px-6 py-3 md:py-4 text-sm md:text-base">
                   <span
                     className={`text-xs font-medium px-2.5 py-0.5 rounded ${getStatusColor(
                       issue.status

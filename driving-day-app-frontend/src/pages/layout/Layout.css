@@ -17,15 +17,28 @@
     .wrapper {
         display: flex;
         width: 100%;
+        flex-direction: column;
+    }
+
+    @media (min-width: 768px) {
+        .wrapper {
+            flex-direction: row;
+        }
     }
 
     .page-content-main {
         width: 100%;
-        margin-left: 16rem;
+        margin-left: 0;
+    }
+
+    @media (min-width: 768px) {
+        .page-content-main {
+            margin-left: 16rem;
+        }
     }
 
     .page-content-body{
-        @apply w-full p-8 max-w-7xl mx-auto;
+        @apply w-full p-4 md:p-8 max-w-7xl mx-auto;
     }
 
     h1 {
