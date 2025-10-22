@@ -17,7 +17,7 @@ def get_csrf_token(request):
     return JsonResponse({"csrfToken": token})
 
 
-def homepage():
+def homepage(request):
     return JsonResponse({
         "message": "Welcome to the FSAE Backend!",
         "status": "success"
