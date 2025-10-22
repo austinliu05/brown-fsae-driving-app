@@ -20,7 +20,7 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DATA_DIR = BASE_DIR / 'fsae_backend_app' / 'ld_parser' / 'data'
+DATA_DIR = BASE_DIR / 'app' / 'ld_parser' / 'data'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     # 'django.contrib.staticfiles',
-    'fsae_backend_app',
+    'app',
     'rest_framework',
     'channels'
 ]
@@ -60,7 +60,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'fsae_backend.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
@@ -102,8 +102,8 @@ CSRF_TRUSTED_ORIGINS = [
     "https://brown-fsae-austinliu05-austinliu05s-projects.vercel.app",
 ]
 
-WSGI_APPLICATION = 'fsae_backend.wsgi.application'
-ASGI_APPLICATION = 'fsae_backend.asgi.application'
+WSGI_APPLICATION = 'config.wsgi.application'
+ASGI_APPLICATION = 'config.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
