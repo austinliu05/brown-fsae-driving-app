@@ -41,5 +41,18 @@ export interface Issue{
 }
 
 
+// Likert-style response used across feedback forms
+export type Likert = 'no' | 'somewhat' | 'yes' | 'n/a'
+
+export interface Feedback {
+    id: string;
+    feedback_number: number;
+    driver: string;
+    synopsis: string;
+    date: string;
+    responses: Record<string, Likert>;
+    comments?: string; 
+}
+
 
 

@@ -484,3 +484,154 @@ def delete_issue(issue_id: str):
     except Exception as e:
         print(f"An unexpected error occurred while deleting issue: {e}")
         return None
+
+def get_latest_feedback_number():
+    try:
+        main_db = db.collection('feedback')
+        query = main_db.order_by('feedback_number', direction=firestore.Query.DESCENDING)
+
+        # Pulls the first entry
+        docs = query.limit(1).stream()
+        
+        for doc in docs:
+            doc_data = doc.to_dict()
+            return doc_data['feedback_number']
+    except Exception as e:
+        print(f"An unexpected error occurred when pulling specific document data (latest feedback number): {e}")
+        return None
+
+def add_feedback(data):
+    try:
+        if not isinstance(data, dict):
+            raise ValueError("Input must be a dictionary.")
+        
+        required_fields = ['driver', 'date', 'synopsis', 'responses']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                raise ValueError(f"Missing or empty required field: {field}")
+
+        # Pull latest feedback number:
+        latest = get_latest_feedback_number()
+
+        try:
+            latest_int = int(latest) if latest is not None else 0
+        except Exception:
+            latest_int = 0
+        new_feedback_num = latest_int + 1
+        data['feedback_number'] = new_feedback_num
+
+        feedback_data = {
+            'driver': data['driver'],
+            'feedback_number': data['feedback_number'],
+            'date': data['date'],
+            'synopsis': data['synopsis'],
+            'responses': data['responses'],
+            'comments': data['comments'],
+            'status': data.get('status', 'Open'),
+            'created_at': firestore.SERVER_TIMESTAMP
+        }
+
+        main_db = db.collection('feedback')
+        doc_ref = main_db.document()
+        doc_ref.set(feedback_data)
+
+        print(f"Feedback '{data['synopsis']}' added with ID: {doc_ref.id}")
+        return {"feedback_id": doc_ref.id}
+
+    except ValueError as ve:
+        print(f"ValueError: {ve}")
+        return None
+
+    except Exception as e:
+        # Clarify message (feedback, not issue)
+        print(f"An unexpected error occurred while adding feedback: {e}")
+        return None
+
+def get_feedback_paginated(page_size, start_at_doc="", start_after_doc=""):
+    try:
+        main_db = db.collection('feedback')
+        query = main_db.order_by('feedback_number', direction=firestore.Query.DESCENDING)
+
+        if len(start_at_doc) > 0:
+            previous_doc_snapshot = main_db.document(start_at_doc)\
+                .get()
+            query = query.start_at(previous_doc_snapshot)
+        elif len(start_after_doc) > 0:
+            last_doc_snapshot = main_db.document(start_after_doc)\
+                .get()
+            query = query.start_after(last_doc_snapshot)
+
+        docs = query\
+            .limit(int(page_size)).stream()
+
+        feedback = []
+        for doc in docs:
+            doc_data = doc.to_dict()
+            doc_data['id'] = doc.id  # Include the document ID if needed
+            feedback.append(doc_data)
+                
+        return feedback
+        
+    except Exception as e:
+        print(f"An unexpected error occurred when pulling feedback (paginated): {e}")
+        return None
+
+def update_feedback(feedback_id: str, data: dict):
+    try:
+        if not isinstance(data, dict):
+            raise ValueError("Input must be a dictionary.")
+        if not feedback_id:
+            raise ValueError("Feedback ID must be provided.")
+
+        feedback_data = {
+            'driver': data.get('driver'),
+            'date': data.get('date'),
+            'synopsis': data.get('synopsis'),
+            'responses': data['responses'],
+            'comments': data['comments'],
+            'status': data.get('status'),
+            'updated_at': firestore.SERVER_TIMESTAMP
+        }
+        feedback_data = {k: v for k, v in feedback_data.items() if v is not None}
+        main_db = db.collection('feedback')
+        doc_ref = main_db.document(feedback_id)
+        
+        # Check if document exists
+        if not doc_ref.get().exists:
+            raise ValueError(f"Feedback with ID {feedback_id} not found.")
+        
+        doc_ref.update(feedback_data)
+        print(f"Feedback {feedback_id} updated successfully")
+        return {"feedback_id": feedback_id}
+
+    except ValueError as ve:
+        print(f"ValueError: {ve}")
+        return None
+    except Exception as e:
+        print(f"An unexpected error occurred while updating feedback: {e}")
+        return None
+
+
+def delete_feedback(feedback_id: str):
+    try:
+        if not feedback_id:
+            raise ValueError("Feedback ID must be provided.")
+
+        main_db = db.collection('feedback')
+        doc_ref = main_db.document(feedback_id)
+        
+        if not doc_ref.get().exists:
+            print(f"Feedback with ID {feedback_id} not found.")
+            return None
+        
+        doc_ref.delete()
+        print(f"Feedback {feedback_id} deleted successfully")
+        return {"feedback_id": feedback_id}
+
+    except ValueError as ve:
+        print(f"ValueError: {ve}")
+        return None
+    except Exception as e:
+        print(f"An unexpected error occurred while deleting feedback: {e}")
+        return None
+
