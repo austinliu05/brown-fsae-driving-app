@@ -465,6 +465,28 @@ async def add_feedback_call(request):
         
     except Exception as e:
         return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
+
+@require_GET
+async def get_all_feedback_call(request):
+    """
+    Retrieves all feedback
+    """
+    try:
+        feedback = await sync_to_async(get_all_feedback)()
+        
+        if feedback is None:
+            return JsonResponse({"error": "Failed to retrieve feedback"}, status=500)
+        
+        return JsonResponse({
+            "feedback": feedback,
+            "message": "Feedback retrieved successfully",
+            "count": len(feedback)
+        }, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            "error": f"An unexpected error occurred: {str(e)}"
+        }, status=500)
     
 
 @require_GET

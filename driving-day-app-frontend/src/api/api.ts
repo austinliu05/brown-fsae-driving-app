@@ -1,6 +1,7 @@
 import axios, { Axios } from "axios";
 import { AxiosError } from "axios";
-import { DataCategory, Likert } from "../utils/DataTypes";
+import { DataCategory, ResponseValue } from "../utils/DataTypes";
+import exp from "constants";
 
 export const api = axios.create({
   baseURL: `${process.env.REACT_APP_BACKEND_URL}/api/`,
@@ -91,9 +92,7 @@ export const postIssue = async (issueData: {
 export const postFeedback = async (feedbackData: {
   driver: string;
   date: string;
-  synopsis: string
-  responses: Record<string, Likert>;
-  comments?: string; 
+  responses: Record<string, ResponseValue>;
 }) => {
   const path = "add-feedback/";
   return await postRequest(path, feedbackData);
@@ -272,6 +271,11 @@ export const getIssuesPaginated = async (filters: {
   return await getRequest(path, params);
 };
 
+export const getAllFeedback = async () => {
+  const path = "all-feedback";
+  return await getRequest(path, new URLSearchParams());
+}
+
 export const getFeedbackPaginated = async (filters: {
   pageSize: number,
   startAtDoc: string,
@@ -329,9 +333,7 @@ export const updateFeedback = async (
   feedbackData: {
     driver?: string;
     date?: string;
-    synopsis?: string;
-    responses?: Record<string, Likert>;
-    comments?: string;
+    responses?: Record<string, ResponseValue>;
   }
 ) => {
   const path = `update-feedback/${feedbackId}/`;

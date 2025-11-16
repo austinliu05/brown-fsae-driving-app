@@ -505,7 +505,7 @@ def add_feedback(data):
         if not isinstance(data, dict):
             raise ValueError("Input must be a dictionary.")
         
-        required_fields = ['driver', 'date', 'synopsis', 'responses']
+        required_fields = ['driver', 'date', 'responses']
         for field in required_fields:
             if field not in data or not data[field]:
                 raise ValueError(f"Missing or empty required field: {field}")
@@ -524,9 +524,7 @@ def add_feedback(data):
             'driver': data['driver'],
             'feedback_number': data['feedback_number'],
             'date': data['date'],
-            'synopsis': data['synopsis'],
             'responses': data['responses'],
-            'comments': data['comments'],
             'status': data.get('status', 'Open'),
             'created_at': firestore.SERVER_TIMESTAMP
         }
@@ -535,7 +533,6 @@ def add_feedback(data):
         doc_ref = main_db.document()
         doc_ref.set(feedback_data)
 
-        print(f"Feedback '{data['synopsis']}' added with ID: {doc_ref.id}")
         return {"feedback_id": doc_ref.id}
 
     except ValueError as ve:
@@ -545,6 +542,32 @@ def add_feedback(data):
     except Exception as e:
         # Clarify message (feedback, not issue)
         print(f"An unexpected error occurred while adding feedback: {e}")
+        return None
+
+def get_all_feedback():
+    """
+    Retrieves all feedback from the 'feedback' collection
+
+    Returns:
+        list: List of dictionaries containing feedback data.
+        None: If an error occurs.
+    """
+    try:
+        main_db = db.collection('feedback')
+        query = main_db.order_by('created_at', direction=firestore.Query.DESCENDING)
+
+        docs = query.stream()
+        
+        feedback = []
+        for doc in docs:
+            feedback_data = doc.to_dict()
+            feedback_data['id'] = doc.id
+            feedback.append(feedback_data)
+                        
+        return feedback
+    
+    except Exception as e:
+        print(f"An error occurred while retrieving feedback: {e}")
         return None
 
 def get_feedback_paginated(page_size, start_at_doc="", start_after_doc=""):
@@ -586,9 +609,7 @@ def update_feedback(feedback_id: str, data: dict):
         feedback_data = {
             'driver': data.get('driver'),
             'date': data.get('date'),
-            'synopsis': data.get('synopsis'),
             'responses': data['responses'],
-            'comments': data['comments'],
             'status': data.get('status'),
             'updated_at': firestore.SERVER_TIMESTAMP
         }
