@@ -100,6 +100,10 @@ export default function AddFeedbackModal({ isOpen, onClose, onSave }: AddFeedbac
       });
       setError(null);
       setSuccess(false);
+      setCurrentPage(0);
+    } else {
+      // reset to first page when modal opens
+      setCurrentPage(0);
     }
   }, [isOpen, today]);
 

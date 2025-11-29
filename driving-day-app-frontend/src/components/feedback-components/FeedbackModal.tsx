@@ -32,6 +32,13 @@ export default function FeedbackModal({
     setEditedFeedback({ ...feedback, date: normalizedDate, responses: { ...(feedback.responses || {}) } } as Feedback);
   }, [feedback]);
 
+  useEffect(() => {
+    if (isOpen) {
+      // reset to first page when modal opens or edit mode changes
+      setCurrentPage(0);
+    }
+  }, [isOpen, editMode]);
+
   // scroll to top when page changes
   useEffect(() => {
     if (scrollContainerRef.current) {

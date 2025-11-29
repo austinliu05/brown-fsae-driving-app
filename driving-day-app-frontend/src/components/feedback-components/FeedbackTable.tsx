@@ -6,6 +6,8 @@ import AppDataContext from '../contexts/AppDataContext';
 import Pagination from "../pagination-components/Pagination";
 import { Feedback } from "../../utils/DataTypes";
 import { Stack } from "../../utils/CustomDataStructs";
+import DriverFilter from "../filter-components/DriverFilter";
+import FiltersBase from "../base-components/FiltersBase";
 
 const globalPageSize = 20
 // Use a STACK to keep track of all (startAfterDoc) entries
@@ -18,12 +20,24 @@ export default function FeedbackTable() {
   const [groupByDate, setGroupByDate] = useState<boolean>(false);
   const [dateFilter, setDateFilter] = useState<string>("");
   const [allFeedback, setAllFeedback] = useState<Feedback[] | null>(null);
+
+  // Auto-enable groupByDate when a date filter is applied
+  useEffect(() => {
+    if (dateFilter && !groupByDate) {
+      setGroupByDate(true);
+    }
+  }, [dateFilter, groupByDate]);
   const [isFullLoading, setIsFullLoading] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  /**
+   * useState hook that stores filter options
+   */
+  const [driverIdFilt, setDriverIdFilt] = useState<string | null>(null);
     
   /**
    * useState hook that stores current page number (for pagination)
@@ -92,11 +106,12 @@ export default function FeedbackTable() {
     source.forEach(f => {
       const d = dayFor(f);
       if (dateFilter && d !== dateFilter) return; // apply date filter
+      if (driverIdFilt && f.driver !== driverIdFilt) return; // apply driver filter
       if (!map[d]) map[d] = [];
       map[d].push(f);
     });
     return map;
-  }, [feedback, dateFilter, groupByDate, allFeedback]);
+  }, [feedback, dateFilter, groupByDate, allFeedback, driverIdFilt]);
 
   // Fetch full dataset when grouping is enabled and we haven't loaded it yet
   useEffect(() => {
@@ -136,29 +151,47 @@ export default function FeedbackTable() {
     <>
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {isLoading && <p>Loading feedback...</p>}
-      <div className="flex items-center justify-between mb-3 gap-2">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <label className="flex items-center gap-2">
-              <input type="checkbox" checked={groupByDate} onChange={(e) => setGroupByDate(e.target.checked)} />
-              <span className="text-sm">Group by driving day date</span>
+      
+      <div className="mb-4">
+        <FiltersBase>
+          <DriverFilter 
+            allDrivers={drivers}
+            setDriverOption={setDriverIdFilt}
+          />
+          
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Date Filter</label>
+            <div className="flex items-center gap-2">
+              <input 
+                type="date" 
+                value={dateFilter} 
+                onChange={(e) => setDateFilter(e.target.value)} 
+                className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px]"
+              />
+              {dateFilter && (
+                <button 
+                  onClick={() => setDateFilter("")} 
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Display Options</label>
+            <label className="flex items-center gap-2 cursor-pointer px-3 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors">
+              <input 
+                type="checkbox" 
+                checked={groupByDate} 
+                onChange={(e) => setGroupByDate(e.target.checked)}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+              />
+              <span className="text-sm font-medium text-gray-700">Group by date</span>
             </label>
           </div>
-
-          <div className="flex items-center gap-2">
-            <input type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} className="border rounded p-1 text-sm" />
-            <button onClick={() => setDateFilter("")} className="text-sm text-gray-600">Clear</button>
-          </div>
-        </div>
-
-        <div>
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="ml-4 bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 focus:outline-none"
-          >
-            Add
-          </button>
-        </div>
+        </FiltersBase>
       </div>
 
       {groupByDate ? (
@@ -235,12 +268,20 @@ export default function FeedbackTable() {
                 <th className="px-6 py-4 text-left font-medium">
                   <div className="flex items-center justify-between">
                     <span>Driving Day Date</span>
+                    <button
+                      onClick={() => setIsAddModalOpen(true)}
+                      className="ml-4 bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 focus:outline-none"
+                    >
+                      Add
+                    </button>
                   </div>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {feedback.map((feed, index) => (
+              {feedback
+                .filter(feed => !driverIdFilt || feed.driver === driverIdFilt)
+                .map((feed, index) => (
                 <tr
                   key={feed.id}
                   onClick={() => {
