@@ -6,7 +6,6 @@ import AppDataContext from '../contexts/AppDataContext';
 import Pagination from "../pagination-components/Pagination";
 import { Feedback } from "../../utils/DataTypes";
 import { Stack } from "../../utils/CustomDataStructs";
-import DriverFilter from "../filter-components/DriverFilter";
 import FiltersBase from "../base-components/FiltersBase";
 
 const globalPageSize = 20
@@ -37,7 +36,7 @@ export default function FeedbackTable() {
   /**
    * useState hook that stores filter options
    */
-  const [driverIdFilt, setDriverIdFilt] = useState<string | null>(null);
+  const [driverNameFilter, setDriverNameFilter] = useState<string>("");
     
   /**
    * useState hook that stores current page number (for pagination)
@@ -106,12 +105,12 @@ export default function FeedbackTable() {
     source.forEach(f => {
       const d = dayFor(f);
       if (dateFilter && d !== dateFilter) return; // apply date filter
-      if (driverIdFilt && f.driver !== driverIdFilt) return; // apply driver filter
+      if (driverNameFilter && !f.driver.toLowerCase().includes(driverNameFilter.toLowerCase())) return; // apply driver name filter
       if (!map[d]) map[d] = [];
       map[d].push(f);
     });
     return map;
-  }, [feedback, dateFilter, groupByDate, allFeedback, driverIdFilt]);
+  }, [feedback, dateFilter, groupByDate, allFeedback, driverNameFilter]);
 
   // Fetch full dataset when grouping is enabled and we haven't loaded it yet
   useEffect(() => {
@@ -154,10 +153,26 @@ export default function FeedbackTable() {
       
       <div className="mb-4">
         <FiltersBase>
-          <DriverFilter 
-            allDrivers={drivers}
-            setDriverOption={setDriverIdFilt}
-          />
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Driver</label>
+            <div className="flex items-center gap-2">
+              <input 
+                type="text" 
+                value={driverNameFilter} 
+                onChange={(e) => setDriverNameFilter(e.target.value)} 
+                placeholder="Search by name..."
+                className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px]"
+              />
+              {driverNameFilter && (
+                <button 
+                  onClick={() => setDriverNameFilter("")} 
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
           
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">Date Filter</label>
@@ -280,7 +295,7 @@ export default function FeedbackTable() {
             </thead>
             <tbody>
               {feedback
-                .filter(feed => !driverIdFilt || feed.driver === driverIdFilt)
+                .filter(feed => !driverNameFilter || feed.driver.toLowerCase().includes(driverNameFilter.toLowerCase()))
                 .map((feed, index) => (
                 <tr
                   key={feed.id}
