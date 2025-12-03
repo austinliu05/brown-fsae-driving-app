@@ -18,7 +18,7 @@ export default function AddIssueModal({
   const today = new Date().toISOString().split("T")[0];
   const [issue, setIssue] = useState<Omit<Issue, "id">>({
     issue_number: -1,
-    driver: "",
+    drivers: [],
     date: today,
     synopsis: "",
     subsystems: [],
@@ -30,14 +30,16 @@ export default function AddIssueModal({
   const [error, setError] = useState<string | null>(null);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDriversDropdownOpen, setIsDriversDropdownOpen] = useState(false); //added a state for driver dropdown
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const availableDrivers = ["Hannah Magino", "John Cena", "Spongebob SquarePants", "Patrick Star"]; //for testing purposes
 
   useEffect(() => {
     return () => {
       setIssue({
         issue_number: -1,
-        driver: "",
+        drivers: [],
         date: today,
         synopsis: "",
         subsystems: [],
@@ -48,6 +50,22 @@ export default function AddIssueModal({
       setPreview(null);
     };
   }, []);
+
+  const handleDriversToggle = (driver: string) => {
+    setIssue((prevIssue) => {
+      if (prevIssue.drivers.includes(driver)) {
+        return {
+          ...prevIssue,
+          drivers: prevIssue.drivers.filter((s) => s !== driver),
+        };
+      } else {
+        return {
+          ...prevIssue,
+          drivers: [...prevIssue.drivers, driver],
+        };
+      }
+    });
+  };
 
   const handleSubsystemToggle = (subsystem: string) => {
     setIssue((prevIssue) => {
@@ -89,7 +107,7 @@ export default function AddIssueModal({
       onSave({ ...issue, id: issueId });
       setIssue({
         issue_number: -1,
-        driver: "",
+        drivers: [],
         date: "",
         synopsis: "",
         subsystems: [],
@@ -114,14 +132,64 @@ export default function AddIssueModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">Driver</label>
-              <input
-                type="text"
-                value={issue.driver}
-                onChange={(e) => setIssue({ ...issue, driver: e.target.value })}
-                className="w-full border rounded p-2"
-                disabled={isLoading}
-              />
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsDriversDropdownOpen(!isDriversDropdownOpen)}
+                  className="w-full border rounded p-2 text-left flex justify-between items-center"
+                  disabled={isLoading}
+                >
+                  <span>
+                  {issue.drivers.length > 0
+                    ? `Selected (${issue.drivers.length})`
+                    : "Select driver(s)"}
+                  </span>
+                  <span>{isDriversDropdownOpen ? "▲" : "▼"}</span>
+                </button>
+
+                {isDriversDropdownOpen && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow-lg max-h-60 overflow-y-auto">
+                    {availableDrivers.map((driver) => (
+                      <div
+                        key={driver}
+                        className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
+                        onClick={() => handleDriversToggle(driver)}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={issue.drivers.includes(driver)}
+                          onChange={() => { }}
+                          className="mr-2"
+                          disabled={isLoading}
+                        />
+                      {driver}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
+
+            <div className="flex gap-2 flex-wrap mt-2">
+              {issue.drivers.map((driver) => (
+                <span
+                  key={driver}
+                  className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded flex items-center"
+                >
+                  {driver}
+                  <button
+                    type="button"
+                    className="ml-1.5 text-blue-800 hover:text-blue-900"
+                    onClick={() => handleDriversToggle(driver)}
+                    disabled={isLoading}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+
+
             <div>
               <label className="block text-sm font-medium mb-1">Date</label>
               <input
