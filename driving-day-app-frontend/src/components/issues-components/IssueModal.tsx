@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useContext} from "react";
 import Modal from "./Modal";
 import { updateIssue, deleteIssue } from "../../api/api";
 import { availableSubsystems, priorityLevels, statusOptions } from "../../constants/IssuesConstants";
 import { Issue } from "../../utils/DataTypes";
+import AppDataContext from '../contexts/AppDataContext';
+
 
 interface IssueModalProps {
   issue: Issue;
@@ -28,7 +30,7 @@ export default function IssueModal({
 
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imgError, setImgError] = useState<string | null>(null);
-  const availableDrivers = ["Hannah Magino", "John Cena", "Spongebob SquarePants", "Patrick Star"]; //for testing purposes
+  const { drivers } = useContext(AppDataContext); //for testing purposes
 
 
   useEffect(() => {
@@ -231,22 +233,22 @@ export default function IssueModal({
 
                       {isDriversDropdownOpen && (
                         <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow-lg max-h-60 overflow-y-auto">
-                          {availableDrivers.map((driver) => (
+                          {drivers.map((driver) => (
                             <div
-                              key={driver}
+                              key={driver.driverId}
                               className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
-                              onClick={() => handleDriversToggle(driver)}
+                              onClick={() => handleDriversToggle(driver.firstName + " " + driver.lastName)}
                             >
                               <input
                                 type="checkbox"
                                 checked={editedIssue.drivers.includes(
-                                  driver
+                                  driver.firstName + " " + driver.lastName
                                 )}
                                 onChange={() => {}}
                                 className="mr-2"
                                 disabled={isLoading}
                               />
-                              {driver}
+                              {driver.firstName + " " + driver.lastName}
                             </div>
                           ))}
                         </div>

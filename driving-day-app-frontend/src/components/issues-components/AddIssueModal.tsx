@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Modal from "./Modal";
 import { postFiles, postIssue, postS3Image } from "../../api/api";
 import { availableSubsystems, priorityLevels, statusOptions } from "../../constants/IssuesConstants";
 import { Issue } from "../../utils/DataTypes";
+import AppDataContext from '../contexts/AppDataContext';
 
 interface AddIssueModalProps {
   isOpen: boolean;
@@ -33,7 +34,7 @@ export default function AddIssueModal({
   const [isDriversDropdownOpen, setIsDriversDropdownOpen] = useState(false); //added a state for driver dropdown
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const availableDrivers = ["Hannah Magino", "John Cena", "Spongebob SquarePants", "Patrick Star"]; //for testing purposes
+  const { drivers } = useContext(AppDataContext); //for testing purposes
 
   useEffect(() => {
     return () => {
@@ -149,20 +150,20 @@ export default function AddIssueModal({
 
                 {isDriversDropdownOpen && (
                   <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow-lg max-h-60 overflow-y-auto">
-                    {availableDrivers.map((driver) => (
+                    {drivers.map((driver) => (
                       <div
-                        key={driver}
+                        key={driver.driverId}
                         className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
-                        onClick={() => handleDriversToggle(driver)}
+                        onClick={() => handleDriversToggle(driver.firstName + " " + driver.lastName)}
                       >
                         <input
                           type="checkbox"
-                          checked={issue.drivers.includes(driver)}
+                          checked={issue.drivers.includes(driver.firstName + " " + driver.lastName)}
                           onChange={() => { }}
                           className="mr-2"
                           disabled={isLoading}
                         />
-                      {driver}
+                      {driver.firstName + " " + driver.lastName}
                     </div>
                   ))}
                 </div>
