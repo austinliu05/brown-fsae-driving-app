@@ -57,6 +57,11 @@ const Navbar = () => {
             My Account
           </Link>
         </li>
+        <li>
+          <Link to="/packing-list" className="navbar-link">
+            Packing Lists
+          </Link>
+        </li>
       </ul>
       {currUserId && 
       <div className="px-4 absolute bottom-4">
