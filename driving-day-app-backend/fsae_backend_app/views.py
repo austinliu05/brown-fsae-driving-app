@@ -445,3 +445,106 @@ async def delete_issue_call(request, issue_id):
             return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
         
     return JsonResponse({"error": "Invalid request method. Use DELETE."}, status=400)
+
+
+@require_GET
+async def get_all_packing_lists_call(request):
+    """
+    Retrieves all packing lists 
+    """
+    try:
+        packing_lists = await sync_to_async(get_all_packing_lists)()
+        
+        if packing_lists is None:
+            return JsonResponse({"error": "Failed to retrieve packing lists"}, status=500)
+        
+        return JsonResponse({
+            "packing_lists": packing_lists,
+            "message": "Packing lists retrieved successfully",
+            "count": len(packing_lists)
+        }, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            "error": f"An unexpected error occurred: {str(e)}"
+        }, status=500)
+    
+@require_POST
+@csrf_exempt
+async def add_packing_list_call(request):
+    """
+    Handles adding a new packing list via a POST request.
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        result = await sync_to_async(add_packing_list)(data)
+        
+        if result is None:
+            return JsonResponse({"error": "Failed to create packing list"}, status=400)
+            
+        return JsonResponse({
+            "message": "Packing list created successfully!",
+            "packing_list_id": result["packing_list_id"]
+        }, status=201)
+        
+    except Exception as e:
+        return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
+    
+
+@csrf_exempt
+async def update_packing_list_call(request, packing_list_id):
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            result = await sync_to_async(update_packing_list)(packing_list_id, data)
+            
+            if result is None:
+                return JsonResponse({"error": "Failed to update packing list or packing list not found"}, status=400)
+                
+            return JsonResponse({
+                "message": "Packing list updated successfully!",
+                "packing_list_id": result["packing_list_id"]
+            }, status=200)
+            
+        except Exception as e:
+            return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
+        
+    return JsonResponse({"error": "Invalid request method. Use PUT."}, status=400)
+
+@csrf_exempt
+async def delete_packing_list_call(request, packing_list_id):
+    """
+    Handles deleting a packing list via a DELETE request.
+
+    This endpoint deletes an existing packing list from the database based on the provided packing_list_id.
+    It expects a DELETE request and returns a success message upon completion.
+
+    Args:
+        packing_list_id (str): The ID of the packing list to delete.
+
+    Methods:
+    - DELETE: Deletes the packing list with the specified ID.
+
+    Returns:
+    - JSON response with a success message if deletion is successful (status 200).
+    - JSON response with an error message if the request method is not DELETE (status 400)
+      or if an error occurs during deletion (status 500).
+    """
+    if request.method == 'DELETE':
+        try:
+            result = await sync_to_async(delete_packing_list)(packing_list_id)
+            
+            if result is None:
+                return JsonResponse({"error": "Failed to delete packing list or packing list not found"}, status=404)
+
+            await sync_to_async(delete_s3_folder)(f"packing_lists/{packing_list_id}/")
+        
+            return JsonResponse({
+                "message": "Packing list deleted successfully!",
+                "packing_list_id": packing_list_id
+            }, status=200)
+            
+        except Exception as e:
+            return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
+        
+    return JsonResponse({"error": "Invalid request method. Use DELETE."}, status=400)

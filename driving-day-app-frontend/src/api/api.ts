@@ -88,6 +88,15 @@ export const postIssue = async (issueData: {
   return await postRequest(path, issueData);
 };
 
+export const postPackingList = async (listData: {
+  name: string;
+  description: string;
+  items: string[];
+}) => {
+  const path = "add-packing-list/";
+  return await postRequest(path, listData);
+};
+
 /**
  *
  * @param path: Corresponds to the relative backend path to which the GET request is sent
@@ -286,6 +295,48 @@ export const updateIssue = async (
 
 export const deleteIssue = async (issueId: string) => {
   const path = `delete-issue/${issueId}/`;
+  try {
+    const response = await api.delete(path);
+    return response;
+  } catch (error) {
+    console.error(error);
+    const axiosError = error as AxiosError;
+    return { status: axiosError.status };
+  }
+};
+
+export const getAllPackingLists = async () => {
+  const path = "all-packing-lists";
+  return await getRequest(path, new URLSearchParams());
+};
+
+export const getPackingList = async (listId: string) => {
+  const path = "packing-list";
+  const params = new URLSearchParams({ listId });
+  return await getRequest(path, params);
+};
+
+export const updatePackingList = async (
+  listId: string,
+  listData: {
+    name?: string;
+    description?: string;
+    items?: string[];
+  }
+) => {
+  const path = `update-packing-list/${listId}/`;
+  try {
+    const response = await api.put(path, listData);
+    return response;
+  } catch (error) {
+    console.error(error);
+    const axiosError = error as AxiosError;
+    return { status: axiosError.status };
+  }
+};
+
+export const deletePackingList = async (listId: string) => {
+  const path = `delete-packing-list/${listId}/`;
   try {
     const response = await api.delete(path);
     return response;

@@ -1,39 +1,39 @@
 import React, { useState } from "react";
 import Modal from "../issues-components/Modal";
-import { PackingTemplate, PackingItem } from "../../constants/PackingListConstants";
+import { PackingTemplate } from "./PackingListTable";
 
 interface AddPackingListModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newTemplate: PackingTemplate) => void;
+  onSave: (newTemplate: PackingTemplate) => Promise<void> | void;
 }
 
 export default function AddPackingListModal({ isOpen, onClose, onSave }: AddPackingListModalProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [items, setItems] = useState<PackingItem[]>([]);
+  const [items, setItems] = useState<string[]>([]);
   const [newItemLabel, setNewItemLabel] = useState("");
 
   const handleAddItem = () => {
     const label = newItemLabel.trim();
     if (!label) return;
-    setItems((prev) => [...prev, { label, checked: false }]);
+    setItems((prev) => [...prev, label]);
     setNewItemLabel("");
   };
 
   const handleDeleteItem = (label: string) => {
-    setItems((prev) => prev.filter((i) => i.label !== label));
+    setItems((prev) => prev.filter((i) => i !== label));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name.trim()) return;
-    onSave({
-      id: Math.random().toString(36).slice(2, 9),
+    // id is a placeholder — PackingListTable.handleSaveAsNew will replace it with the backend-generated id
+    await onSave({
+      id: "",
       name: name.trim(),
       description: description.trim(),
       items,
     });
-    // Reset form
     setName("");
     setDescription("");
     setItems([]);
@@ -85,11 +85,11 @@ export default function AddPackingListModal({ isOpen, onClose, onSave }: AddPack
             {items.length === 0 && (
               <p className="text-sm italic text-gray-400 py-2 text-center">No items yet</p>
             )}
-            {items.map((item) => (
-              <div key={item.label} className="flex items-center gap-3 py-2 px-2 rounded hover:bg-gray-50 group">
-                <span className="flex-1 text-sm">{item.label}</span>
+            {items.map((label) => (
+              <div key={label} className="flex items-center gap-3 py-2 px-2 rounded hover:bg-gray-50 group">
+                <span className="flex-1 text-sm">{label}</span>
                 <button
-                  onClick={() => handleDeleteItem(item.label)}
+                  onClick={() => handleDeleteItem(label)}
                   className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 text-xs transition-opacity"
                 >
                   ✕

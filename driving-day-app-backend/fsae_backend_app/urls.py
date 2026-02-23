@@ -8,12 +8,15 @@ urlpatterns = [
     path('upload-files/', upload_files_call, name='upload-files'),
     path('add-driver/', add_driver_call, name='add-driver'),
     path('add-issue/', add_issue_call, name='add-issue'),
+    path('add-packing-list/', add_packing_list_call, name='add-packing-list'),
     
     # PUT Requests
     path('update-issue/<str:issue_id>/', update_issue_call, name='update-issue'),
+    path('update-packing-list/<str:packing_list_id>/', update_packing_list_call, name='update-packing-list'),
     
     # DELETE Requests
     path('delete-issue/<str:issue_id>/', delete_issue_call, name='delete-issue'),
+    path('delete-packing-list/<str:packing_list_id>/', delete_packing_list_call, name='delete-packing-list'),
 
     # GET Requests (indicated by NO /)
     path('all-drivers', get_all_drivers_call, name='all-drivers'),
@@ -24,4 +27,5 @@ urlpatterns = [
     path('all-issues', get_all_issues_call, name='all-issues'),
     path('issues-paginated', get_issues_paginated_call, name='get-issues-paginated'),
     path('get-csrf-token', get_csrf_token, name='get-csrf-token'),
+    path('all-packing-lists', get_all_packing_lists_call, name='all-packing-lists'),
 ]

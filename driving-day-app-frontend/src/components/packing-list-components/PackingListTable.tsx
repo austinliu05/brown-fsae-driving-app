@@ -1,47 +1,99 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PackingListModal from "./PackingListModal";
 import AddPackingListModal from "./AddPackingListModal";
-import { defaultTemplates, PackingTemplate } from "../../constants/PackingListConstants";
+import { getAllPackingLists, updatePackingList, postPackingList, deletePackingList } from "../../api/api";
 
+export interface PackingTemplate {
+  id: string;
+  name: string;
+  description: string;
+  items: string[];   
+}
 
 export default function PackingListTable() {
-  const [templates, setTemplates] = useState<PackingTemplate[]>(defaultTemplates);
+  const [templates, setTemplates] = useState<PackingTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<PackingTemplate | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch all packing list templates from the backend on mount
+  const fetchTemplates = async () => {
+    setIsLoading(true);
+    try {
+      const response = await getAllPackingLists();
+      if (response.status === 200 && response.data) {
+        const lists: PackingTemplate[] = response.data.packing_lists.map((pl: any) => ({
+          id: pl.id,
+          name: pl.name,
+          description: pl.description,
+          items: pl.items ?? [],
+        }));
+        setTemplates(lists);
+      }
+    } catch (error) {
+      console.error("Failed to fetch packing lists:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTemplates();
+  }, []);
 
   const handleOpenModal = (template: PackingTemplate) => {
     setSelectedTemplate(template);
     setIsModalOpen(true);
   };
 
-  // Called when checking/unchecking — updates the original in place
-  const handleUpdateProgress = (updated: PackingTemplate) => {
-    setTemplates((prev) =>
-      prev.map((t) => (t.id === updated.id ? updated : t))
-    );
-    setSelectedTemplate(updated);
+  // Save edits to the current list via PUT
+  const handleSaveAsCurrent = async (updated: PackingTemplate) => {
+    const response = await updatePackingList(updated.id, {
+      name: updated.name,
+      description: updated.description,
+      items: updated.items,
+    });
+    if (response.status === 200) {
+      setTemplates((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+      setSelectedTemplate(updated);
+    } else {
+      console.error("Failed to update packing list");
+    }
   };
 
-  // Called when adding/deleting items — appends as a new card
-  const handleSaveAsNew = (updated: PackingTemplate) => {
-    setTemplates((prev) => [...prev, updated]);
+  // Save as a brand-new list via POST
+  const handleSaveAsNew = async (newTemplate: PackingTemplate) => {
+    const response = await postPackingList({
+      name: newTemplate.name,
+      description: newTemplate.description,
+      items: newTemplate.items,
+    });
+    if (response.status === 201 && "data" in response && response.data) {
+      const created: PackingTemplate = {
+        ...newTemplate,
+        id: response.data.packing_list_id,
+      };
+      setTemplates((prev) => [...prev, created]);
+    } else {
+      console.error("Failed to create packing list");
+    }
   };
 
-  const handleDeleteTemplate = (id: string) => {
-    setTemplates((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  const getProgress = (template: PackingTemplate) => {
-    const total = template.items.length;
-    const done = template.items.filter((i) => i.checked).length;
-    return { done, total, pct: total === 0 ? 0 : Math.round((done / total) * 100) };
+  // Delete a list via DELETE
+  const handleDeleteTemplate = async (id: string) => {
+    const response = await deletePackingList(id);
+    if (response.status === 200) {
+      setTemplates((prev) => prev.filter((t) => t.id !== id));
+    } else {
+      console.error("Failed to delete packing list");
+    }
   };
 
   return (
     <>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-gray-500"></p>
+        <p className="text-sm text-gray-500">{isLoading ? "Loading..." : ""}</p>
         <button
           onClick={() => setIsAddModalOpen(true)}
           className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 focus:outline-none"
@@ -51,36 +103,18 @@ export default function PackingListTable() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {templates.map((template) => {
-          const { done, total, pct } = getProgress(template);
-          const allDone = done === total && total > 0;
-
-          return (
-            <div
-              key={template.id}
-              onClick={() => handleOpenModal(template)}
-              className="bg-white rounded-lg border border-gray-200 p-5 cursor-pointer hover:bg-gray-50 hover:shadow-md transition-all"
-              tabIndex={0}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <h2 className="text-lg font-semibold">{template.name}</h2>
-                {allDone && (
-                  <span className="text-xs font-medium px-2 py-0.5 rounded bg-green-100 text-green-800">
-                    Complete
-                  </span>
-                )}
-              </div>
-              <p className="text-sm text-gray-500 mb-4">{template.description}</p>
-              <div className="w-full bg-gray-100 rounded-full h-2 mb-1">
-                <div
-                  className={`h-2 rounded-full transition-all ${allDone ? "bg-green-500" : "bg-blue-500"}`}
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-              <p className="text-xs text-gray-400">{done}/{total} items packed</p>
-            </div>
-          );
-        })}
+        {templates.map((template) => (
+          <div
+            key={template.id}
+            onClick={() => handleOpenModal(template)}
+            className="bg-white rounded-lg border border-gray-200 p-5 cursor-pointer hover:bg-gray-50 hover:shadow-md transition-all"
+            tabIndex={0}
+          >
+            <h2 className="text-lg font-semibold mb-1">{template.name}</h2>
+            <p className="text-sm text-gray-500 mb-3">{template.description}</p>
+            <p className="text-xs text-gray-400">{template.items.length} items</p>
+          </div>
+        ))}
       </div>
 
       {selectedTemplate && (
@@ -88,7 +122,7 @@ export default function PackingListTable() {
           template={selectedTemplate}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          onUpdateProgress={handleUpdateProgress}
+          onSaveAsCurrent={handleSaveAsCurrent}
           onSaveAsNew={handleSaveAsNew}
           onDelete={handleDeleteTemplate}
         />
@@ -97,7 +131,7 @@ export default function PackingListTable() {
       <AddPackingListModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onSave={(newTemplate) => setTemplates((prev) => [...prev, newTemplate])}
+        onSave={handleSaveAsNew}
       />
     </>
   );
