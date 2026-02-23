@@ -48,13 +48,8 @@ const Navbar = () => {
           </Link>
         </li>
         <li>
-          <Link to="/new-driving-day" className="navbar-link">
-            New Driving Day
-          </Link>
-        </li>
-        <li>
           <Link to="/past-driving-days" className="navbar-link">
-            Past Driving Days
+            Driving Days
           </Link>
         </li>
         <li>
