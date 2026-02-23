@@ -11,6 +11,8 @@ import HomePage from "./pages/home-page/HomePage";
 import DevPage from "./pages/dev-page/DevPage";
 import IssuesPage from "./pages/issues-page/IssuesPage";
 import MyAccountPage from "./pages/account-page/MyAccountPage";
+import NewDrivingDayPage from "./pages/new-driving-day-page/NewDrivingDayPage";
+import PastDrivingDaysPage from "./pages/past-driving-days-page/PastDrivingDaysPage";
 
 /**
  * Creates an object that handles routing for all webpages:
@@ -48,6 +50,14 @@ const router = createBrowserRouter([
       {
         path: "/issues",
         element: <IssuesPage />,
+      },
+      {
+        path: "/new-driving-day",
+        element: <NewDrivingDayPage />,
+      },
+      {
+        path: "/past-driving-days",
+        element: <PastDrivingDaysPage />,
       },
     ],
   },
