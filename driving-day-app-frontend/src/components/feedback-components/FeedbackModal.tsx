@@ -4,7 +4,7 @@ import DatePicker from "react-datepicker";
 import { updateFeedback, deleteFeedback } from "../../api/api";
 import { Feedback, ResponseValue } from "../../utils/DataTypes";
 import { questionList, pages, pageTitles } from "./AddFeedbackModal";
-import { QuestionField, toggleMulti, normalizeDateInput, formatMultiDisplay, toISODate } from './feedbackHelpers';
+import { QuestionField, toggleMulti, normalizeDateInput, formatMultiDisplay, toISODate } from '../../utils/feedbackHelpers';
 
 interface FeedbackModalProps {
   feedback: Feedback;

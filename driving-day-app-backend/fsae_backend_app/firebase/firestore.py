@@ -513,11 +513,11 @@ def add_feedback(data):
         # Pull latest feedback number:
         latest = get_latest_feedback_number()
 
-        try:
-            latest_int = int(latest) if latest is not None else 0
-        except Exception:
-            latest_int = 0
-        new_feedback_num = latest_int + 1
+        if latest is not None:
+            new_feedback_num = int(latest) + 1
+        else:
+            new_feedback_num = 1
+
         data['feedback_number'] = new_feedback_num
 
         feedback_data = {
@@ -535,12 +535,7 @@ def add_feedback(data):
 
         return {"feedback_id": doc_ref.id}
 
-    except ValueError as ve:
-        print(f"ValueError: {ve}")
-        return None
-
     except Exception as e:
-        # Clarify message (feedback, not issue)
         print(f"An unexpected error occurred while adding feedback: {e}")
         return None
 
@@ -590,7 +585,7 @@ def get_feedback_paginated(page_size, start_at_doc="", start_after_doc=""):
         feedback = []
         for doc in docs:
             doc_data = doc.to_dict()
-            doc_data['id'] = doc.id  # Include the document ID if needed
+            doc_data['id'] = doc.id  
             feedback.append(doc_data)
                 
         return feedback
@@ -602,9 +597,11 @@ def get_feedback_paginated(page_size, start_at_doc="", start_after_doc=""):
 def update_feedback(feedback_id: str, data: dict):
     try:
         if not isinstance(data, dict):
-            raise ValueError("Input must be a dictionary.")
+            print("Input must be a dictionary.")
+            return None
         if not feedback_id:
-            raise ValueError("Feedback ID must be provided.")
+            print("Feedback ID must be provided.")
+            return None
 
         feedback_data = {
             'driver': data.get('driver'),
@@ -625,9 +622,6 @@ def update_feedback(feedback_id: str, data: dict):
         print(f"Feedback {feedback_id} updated successfully")
         return {"feedback_id": feedback_id}
 
-    except ValueError as ve:
-        print(f"ValueError: {ve}")
-        return None
     except Exception as e:
         print(f"An unexpected error occurred while updating feedback: {e}")
         return None
@@ -636,7 +630,8 @@ def update_feedback(feedback_id: str, data: dict):
 def delete_feedback(feedback_id: str):
     try:
         if not feedback_id:
-            raise ValueError("Feedback ID must be provided.")
+            print("Feedback ID must be provided.")
+            return None
 
         main_db = db.collection('feedback')
         doc_ref = main_db.document(feedback_id)
@@ -649,9 +644,6 @@ def delete_feedback(feedback_id: str):
         print(f"Feedback {feedback_id} deleted successfully")
         return {"feedback_id": feedback_id}
 
-    except ValueError as ve:
-        print(f"ValueError: {ve}")
-        return None
     except Exception as e:
         print(f"An unexpected error occurred while deleting feedback: {e}")
         return None

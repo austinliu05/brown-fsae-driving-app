@@ -1,7 +1,5 @@
 import React from 'react';
-import { ResponseValue } from '../../utils/DataTypes';
-
-export type QType = 'yesOther' | 'noOther' | 'text' | 'multi';
+import { ResponseValue, QType } from './DataTypes';
 
 export interface Question {
   key: string;

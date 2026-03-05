@@ -2,73 +2,28 @@ import React, { useEffect, useState, useRef } from "react";
 import './AddFeedbackModal.css'
 import DatePicker from "react-datepicker";
 import { postFeedback } from '../../api/api';
-import { ResponseValue, Feedback } from "../../utils/DataTypes";
-import { QuestionField, toggleMulti, normalizeDateInput, toISODate } from './feedbackHelpers';
+import { ResponseValue, Feedback, QType } from "../../utils/DataTypes";
+import { QuestionField, toggleMulti, normalizeDateInput, toISODate } from '../../utils/feedbackHelpers';
 import Modal from "../issues-components/Modal";
-
-export type QType = 'yesOther' | 'noOther' | 'text' | 'multi';
+import feedbackQuestionsData from '../../constants/feedbackQuestions.json';
 
 export const questionList: {
   key: string;
   label: string;
   type: QType;
-  options?: string[];        // for choice/radio/multi
-  placeholder?: string;      // for text / yesOther / noOther input
-}[] = [
-  { key: 'setup_diff', label: 'How is this setup different from the last one?', type: 'text', placeholder: 'Describe...' },
-  
-  { key: 'straight_accel', label: 'Did the car go straight when accelerating?', type: 'yesOther', placeholder: 'If other, describe...' },
-  { key: 'wobbly_accel', label: 'Did the car feel wobbly/unstable when accelerating hard?', type: 'noOther', placeholder: 'If other, describe...' },
-  { key: 'twitchy_bumps', label: 'Did the car feel twitchy going over bumps?', type: 'noOther', placeholder: 'If other, describe...' },
-  { key: 'otherStraightLines', label: 'Other Straight Lines Feedback', type: 'text', placeholder: 'Describe...' },
-  
-  { key: 'brake_straight', label: 'Did the car stay straight when braking hard?', type: 'yesOther', placeholder: 'If other, describe...' },
-  { key: 'brake_loose', label: 'Did the car feel loose or try to spin?', type: 'noOther', placeholder: 'If other, describe...' },
-  { key: 'otherBraking', label: 'Other Braking Feedback', type: 'text', placeholder: 'Describe...' },
-  
-  { key: 'corner_entry_turn', label: 'Did the car start turning when you wanted it to?', type: 'yesOther', placeholder: 'If other, describe...' },
-  { key: 'understeer', label: 'Did the front of the car slide / not want to turn (understeer)?', type: 'noOther', placeholder: 'If other, describe...' },
-  { key: 'oversteer', label: 'Did the rear of the car swing around (oversteer)?', type: 'noOther', placeholder: 'If other, describe...' },
-  { key: 'otherCornerEntry', label: 'Other Corner Entry Feedback', type: 'text', placeholder: 'Describe...' },
+  options?: string[];
+  placeholder?: string;
+}[] = feedbackQuestionsData.questionList as {
+  key: string;
+  label: string;
+  type: QType;
+  options?: string[];
+  placeholder?: string;
+}[];
 
-  { key: 'corner_apex_balance', label: 'Did the car feel balanced through the middle of the turn?', type: 'yesOther', placeholder: 'If other, describe...' },
-  { key: 'understeerApex', label: 'Did the car push wide (understeer) at the apex?', type: 'noOther', placeholder: 'If other, describe...' },
-  { key: 'oversteerApex', label: 'Did the car feel like the rear was swinging around (oversteer) at the apex?', type: 'noOther', placeholder: 'If other, describe...' },
-  { key: 'otherCornerApex', label: 'Other Corner Apex Feedback', type: 'text', placeholder: 'Describe...' },
-  
-  { key: 'corner_exit_slide', label: 'Did the car keep sliding wide when exiting the turn?', type: 'noOther', placeholder: 'If other, describe...' },
-  { key: 'exit_loose', label: 'Did the car feel loose/hard to control on throttle?', type: 'noOther', placeholder: 'If other, describe...' },
-  { key: 'otherCornerExit', label: 'Other Corner Exit Feedback', type: 'text', placeholder: 'Describe...' },
-  
-  { key: 'slalom_steer', label: 'How did the steering feel in the quick transitions?', type: 'multi', options: ['Just right', 'Too slow', 'Too quick', 'Other'], placeholder: 'If other, describe...'},
-  { key: 'slalom_feel', label: 'How did the car feel?', type: 'multi', options: ['Stable/Planted', 'Rolled too much', 'Soft/Floppy', 'Other'], placeholder: 'If other, describe...' },
-  { key: 'otherSlalom', label: 'Other Slalom Feedback', type: 'text', placeholder: 'Describe...' },
-  
-  { key: 'other_feedback', label: 'Any other feedback', type: 'text', placeholder: 'Freeform comments...' }
-];
+export const pages: string[][] = feedbackQuestionsData.pages;
 
-// Define pages as arrays of question keys grouped by logical sections.
-export const pages: string[][] = [
-  ['setup_diff'],
-  ['straight_accel', 'wobbly_accel', 'twitchy_bumps', 'otherStraightLines'],
-  ['brake_straight', 'brake_loose', 'otherBraking'],
-  ['corner_entry_turn', 'understeer', 'oversteer', 'otherCornerEntry'],
-  ['corner_apex_balance', 'understeerApex', 'oversteerApex', 'otherCornerApex'],
-  ['corner_exit_slide', 'exit_loose', 'otherCornerExit'],
-  ['slalom_steer', 'slalom_feel', 'otherSlalom'],
-  ['other_feedback']
-];
-
-export const pageTitles: string[] = [
-    'Setup Differences',
-    'Straight-line',
-    'Braking Feedback',
-    'Corner Entry',
-    'Corner Apex',
-    'Corner Exit',
-    'Slalom',
-    'Other Feedback'
-  ];
+export const pageTitles: string[] = feedbackQuestionsData.pageTitles;
 
 interface AddFeedbackModalProps {
   isOpen: boolean;
