@@ -490,7 +490,6 @@ def get_latest_packing_list_number():
         main_db = db.collection('packing_lists')
         query = main_db.order_by('packing_list_number', direction=firestore.Query.DESCENDING)
 
-        # Pulls the first entry
         docs = query.limit(1).stream()
         
         for doc in docs:
@@ -540,12 +539,14 @@ def add_packing_list(data):
     """
     try:
         if not isinstance(data, dict):
-            raise ValueError("Input must be a dictionary.")
-        
+            print("Input must be a dictionary.")
+            return None
+
         required_fields = ['name', 'description', 'items']
         for field in required_fields:
             if field not in data or not data[field]:
-                raise ValueError(f"Missing or empty required field: {field}")
+                print(f"Missing or empty required field: {field}")
+                return None
 
         new_packing_list_number = int(get_latest_packing_list_number()) + 1
         data['packing_list_number'] = new_packing_list_number
@@ -565,10 +566,6 @@ def add_packing_list(data):
         print(f"Packing list '{data['name']}' added with ID: {doc_ref.id}")
         return {"packing_list_id": doc_ref.id}
 
-    except ValueError as ve:
-        print(f"ValueError: {ve}")
-        return None
-
     except Exception as e:
         print(f"An unexpected error occurred while adding packing list: {e}")
         return None
@@ -576,10 +573,12 @@ def add_packing_list(data):
 def update_packing_list(packing_list_id: str, data: dict):
     try:
         if not isinstance(data, dict):
-            raise ValueError("Input must be a dictionary.")
+            print("Input must be a dictionary.")
+            return None
         if not packing_list_id:
-            raise ValueError("Packing list ID must be provided.")
-        
+            print("Packing list ID must be provided.")
+            return None
+
         packing_list_data = {
             'name': data.get('name'),
             'description': data.get('description'),
@@ -593,15 +592,13 @@ def update_packing_list(packing_list_id: str, data: dict):
         
         # Check if document exists
         if not doc_ref.get().exists:
-            raise ValueError(f"Packing list with ID {packing_list_id} not found.")
+            print(f"Packing list with ID {packing_list_id} not found.")
+            return None
         
         doc_ref.update(packing_list_data)
         print(f"Packing list {packing_list_id} updated successfully")
         return {"packing_list_id": packing_list_id}
 
-    except ValueError as ve:
-        print(f"ValueError: {ve}")
-        return None
     except Exception as e:
         print(f"An unexpected error occurred while updating packing list: {e}")
         return None
@@ -610,7 +607,8 @@ def update_packing_list(packing_list_id: str, data: dict):
 def delete_packing_list(packing_list_id: str):
     try:
         if not packing_list_id:
-            raise ValueError("Packing list ID must be provided.")
+            print("Packing list ID must be provided.")
+            return None
 
         main_db = db.collection('packing_lists')
         doc_ref = main_db.document(packing_list_id)
@@ -623,9 +621,6 @@ def delete_packing_list(packing_list_id: str):
         print(f"Packing list {packing_list_id} deleted successfully")
         return {"packing_list_id": packing_list_id}
 
-    except ValueError as ve:
-        print(f"ValueError: {ve}")
-        return None
     except Exception as e:
         print(f"An unexpected error occurred while deleting packing list: {e}")
         return None

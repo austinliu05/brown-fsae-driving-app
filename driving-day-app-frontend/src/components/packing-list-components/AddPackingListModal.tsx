@@ -27,7 +27,6 @@ export default function AddPackingListModal({ isOpen, onClose, onSave }: AddPack
 
   const handleSave = async () => {
     if (!name.trim()) return;
-    // id is a placeholder — PackingListTable.handleSaveAsNew will replace it with the backend-generated id
     await onSave({
       id: "",
       name: name.trim(),
