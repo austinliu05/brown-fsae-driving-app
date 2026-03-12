@@ -13,6 +13,7 @@ import IssuesPage from "./pages/issues-page/IssuesPage";
 import MyAccountPage from "./pages/account-page/MyAccountPage";
 import NewDrivingDayPage from "./pages/new-driving-day-page/NewDrivingDayPage";
 import PastDrivingDaysPage from "./pages/past-driving-days-page/PastDrivingDaysPage";
+import UpdateDrivingDayPage from "./pages/update-driving-day-page/UpdateDrivingDayPage";
 
 /**
  * Creates an object that handles routing for all webpages:
@@ -58,6 +59,10 @@ const router = createBrowserRouter([
       {
         path: "/past-driving-days",
         element: <PastDrivingDaysPage />,
+      },
+      {
+        path: "/update-driving-day",
+        element: <UpdateDrivingDayPage />,
       },
     ],
   },

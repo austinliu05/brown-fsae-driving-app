@@ -40,6 +40,66 @@ export interface Issue{
     status: string;
 }
 
+export interface PackingList {
+    id: string;
+    name: string;
+    description: string;
+    items: string[];
+}
+
+export interface PackingListEntry {
+    packingListId: string;
+    checkedItems: number[];
+}
+
+export interface DrivingDay {
+    id: string;
+    dayNumber: number;
+    title: string;
+    date: string;
+    description: string;
+    driverIds: string[];
+    packingLists: PackingListEntry[];
+    issueIds: string[];
+    feedback: string[];
+}
+
+export const MOCK_PACKING_LISTS: PackingList[] = [
+  {
+    id: "pl1",
+    name: "Standard Track Day",
+    description: "Everything needed for a full day at the track",
+    items: [
+      "Fire extinguisher",
+      "First aid kit",
+      "Tool chest",
+      "Tire warmers",
+      "Spare tire set",
+      "Fuel jugs (x2)",
+      "Helmet(s)",
+      "Driver suits",
+      "Data logging laptop",
+      "Pop-up tent",
+      "Folding table & chairs",
+      "Battery charger",
+      "Jack & jack stands",
+      "Rain canopy",
+    ],
+  },
+  {
+    id: "pl2",
+    name: "Minimal Shakedown",
+    description: "Bare essentials for a quick shakedown run",
+    items: [
+      "Fire extinguisher",
+      "First aid kit",
+      "Helmet(s)",
+      "Driver suits",
+      "Tool chest",
+      "Battery charger",
+    ],
+  },
+];
 
 
 

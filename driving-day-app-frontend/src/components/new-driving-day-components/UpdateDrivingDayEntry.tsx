@@ -1,33 +1,97 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Issue, MOCK_PACKING_LISTS } from "../../utils/DataTypes";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Issue, DrivingDay, MOCK_PACKING_LISTS } from "../../utils/DataTypes";
 import { Driver } from "../../utils/DriverType";
-import { getAllIssues, postDrivingDay } from "../../api/api";
+import { getAllIssues, updateDrivingDay, deleteDrivingDay } from "../../api/api";
 
-export default function NewDrivingDayEntry() {
+export default function UpdateDrivingDayEntry() {
   const navigate = useNavigate();
-  const today = new Date().toISOString().split("T")[0];
+  const location = useLocation();
+  const drivingDay = location.state?.drivingDay as DrivingDay | undefined;
 
   // Form fields
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState(today);
+  const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Backend issues
   const [backendIssues, setBackendIssues] = useState<Issue[]>([]);
 
-  // Packing lists — multiple can be added
-  // TODO: Replace MOCK_PACKING_LISTS with data from backend
+  // Packing lists
   const availablePackingLists = MOCK_PACKING_LISTS;
   const [addedPackingListIds, setAddedPackingListIds] = useState<string[]>([]);
-
-  // Track which accordions are expanded (by packing list id)
   const [expandedListIds, setExpandedListIds] = useState<Set<string>>(new Set());
-
-  // Track checked items per packing list: { listId: Set<itemIndex> }
   const [checkedItems, setCheckedItems] = useState<Record<string, Set<number>>>({});
+
+  // Drivers
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [selectedDriverIds, setSelectedDriverIds] = useState<string[]>([]);
+  const [newDriverName, setNewDriverName] = useState("");
+
+  // Issues
+  const [linkedIssueIds, setLinkedIssueIds] = useState<string[]>([]);
+  const [isIssueDropdownOpen, setIsIssueDropdownOpen] = useState(false);
+
+
+  // Redirect if no driving day data was passed
+  useEffect(() => {
+    if (!drivingDay) {
+      navigate("/past-driving-days");
+      return;
+    }
+
+    // Pre-populate form fields from existing driving day
+    setTitle(drivingDay.title);
+    setDate(drivingDay.date);
+    setDescription(drivingDay.description);
+    setSelectedDriverIds(drivingDay.driverIds);
+
+    // Pre-populate packing lists
+    const plIds = drivingDay.packingLists.map((pl) => pl.packingListId);
+    setAddedPackingListIds(plIds);
+    setExpandedListIds(new Set(plIds));
+
+    const checked: Record<string, Set<number>> = {};
+    drivingDay.packingLists.forEach((pl) => {
+      checked[pl.packingListId] = new Set(pl.checkedItems);
+    });
+    setCheckedItems(checked);
+  }, [drivingDay, navigate]);
+
+  // Fetch issues from backend on mount and pre-populate linked issues
+  useEffect(() => {
+    const fetchIssues = async () => {
+      try {
+        const response = await getAllIssues();
+        if (response.data?.issues) {
+          const issues: Issue[] = response.data.issues;
+          setBackendIssues(issues);
+
+          // drivingDay.issueIds contains issue_numbers (from backend),
+          // so convert them to document IDs for the linked issues state
+          if (drivingDay) {
+            const issueDocIds = drivingDay.issueIds
+              .map((numOrId) => {
+                const match = issues.find(
+                  (i) => String(i.issue_number) === String(numOrId) || i.id === numOrId
+                );
+                return match?.id;
+              })
+              .filter((id): id is string => !!id);
+            setLinkedIssueIds(issueDocIds);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch issues:", err);
+      }
+    };
+    fetchIssues();
+  }, [drivingDay]);
+
+  // ── Packing list handlers ─────
 
   const handleAddPackingList = (listId: string) => {
     if (!listId || addedPackingListIds.includes(listId)) return;
@@ -58,32 +122,7 @@ export default function NewDrivingDayEntry() {
     });
   };
 
-  // Drivers
-  const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [selectedDriverIds, setSelectedDriverIds] = useState<string[]>([]);
-  const [newDriverName, setNewDriverName] = useState("");
-
-  // Issues
-  const [linkedIssueIds, setLinkedIssueIds] = useState<string[]>([]);
-  const [isIssueDropdownOpen, setIsIssueDropdownOpen] = useState(false);
-
-
-  // Fetch issues from backend on mount
-  useEffect(() => {
-    const fetchIssues = async () => {
-      try {
-        const response = await getAllIssues();
-        if (response.data?.issues) {
-          setBackendIssues(response.data.issues);
-        }
-      } catch (err) {
-        console.error("Failed to fetch issues:", err);
-      }
-    };
-    fetchIssues();
-  }, []);
-
-  // ── Handlers ─────
+  // ── Other handlers ─────
 
   const toggleDriver = (driverId: string) => {
     setSelectedDriverIds((prev) =>
@@ -97,13 +136,13 @@ export default function NewDrivingDayEntry() {
     );
   };
 
-  // Combine backend issues for lookups
   const allIssues = [...backendIssues].sort(
     (a, b) => b.issue_number - a.issue_number
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!drivingDay) return;
     setIsLoading(true);
     setError(null);
 
@@ -113,7 +152,7 @@ export default function NewDrivingDayEntry() {
         checkedItems: Array.from(checkedItems[listId] ?? []),
       }));
 
-      const response = await postDrivingDay({
+      const response = await updateDrivingDay(drivingDay.id, {
         title,
         date,
         description,
@@ -126,19 +165,39 @@ export default function NewDrivingDayEntry() {
         feedback: [],
       });
 
-      if (response.status !== 200 && response.status !== 201) {
-        throw new Error("Failed to create driving day");
+      if (response.status !== 200) {
+        throw new Error("Failed to update driving day");
       }
 
       navigate("/past-driving-days");
     } catch (err) {
-      setError("Error saving driving day. Please make sure all required fields are filled.");
+      setError("Error updating driving day. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleDeleteConfirm = async () => {
+    if (!drivingDay) return;
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await deleteDrivingDay(drivingDay.id);
+      if (response.status !== 200) {
+        throw new Error("Failed to delete driving day");
+      }
+      navigate("/past-driving-days");
+    } catch (err) {
+      setError("Failed to delete driving day. Please try again.");
+    } finally {
+      setIsLoading(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   // ── Helpers ────
+
   const getPriorityColor = (priority: string) => {
     switch (priority.toLowerCase()) {
       case "low": return "bg-green-100 text-green-800";
@@ -158,11 +217,38 @@ export default function NewDrivingDayEntry() {
     }
   };
 
+  if (!drivingDay) return null;
+
   // ── Render ───
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {error && <p className="text-red-500 mb-4">{error}</p>}
+
+      {showDeleteConfirm && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <p className="font-medium mb-4">Are you sure you want to delete this driving day?</p>
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(false)}
+              className="px-4 py-2 border rounded"
+              disabled={isLoading}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteConfirm}
+              className="px-4 py-2 bg-red-500 text-white rounded disabled:bg-red-300"
+              disabled={isLoading}
+            >
+              {isLoading ? "Deleting..." : "Confirm Delete"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Title, Date & Description ──-- */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h2 className="text-lg font-semibold mb-4">Driving Day Info</h2>
@@ -175,6 +261,7 @@ export default function NewDrivingDayEntry() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Pre-Competition Shakedown, Endurance Practice"
               className="w-full border rounded p-2"
+              disabled={isLoading}
             />
           </div>
           <div className="md:w-1/3 mb-4">
@@ -184,6 +271,7 @@ export default function NewDrivingDayEntry() {
               value={date}
               onChange={(e) => setDate(e.target.value)}
               className="w-full border rounded p-2"
+              disabled={isLoading}
             />
           </div>
         </div>
@@ -194,6 +282,7 @@ export default function NewDrivingDayEntry() {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe the goals, conditions, or notes for this driving day…"
             className="w-full border rounded p-2 h-32 resize-y"
+            disabled={isLoading}
           />
         </div>
       </div>
@@ -203,10 +292,9 @@ export default function NewDrivingDayEntry() {
         <h2 className="text-lg font-semibold mb-2">Packing Lists</h2>
         <p className="text-sm text-gray-500 mb-4">Add one or more packing lists and check off items as you pack.</p>
 
-        {/* Selector to add a packing list */}
         <div className="flex gap-2 mb-4">
           <select
-            id="packing-list-selector"
+            id="packing-list-selector-update"
             defaultValue=""
             className="flex-1 border rounded p-2"
           >
@@ -220,7 +308,7 @@ export default function NewDrivingDayEntry() {
           <button
             type="button"
             onClick={() => {
-              const sel = document.getElementById("packing-list-selector") as HTMLSelectElement;
+              const sel = document.getElementById("packing-list-selector-update") as HTMLSelectElement;
               if (sel.value) {
                 handleAddPackingList(sel.value);
                 sel.value = "";
@@ -232,7 +320,6 @@ export default function NewDrivingDayEntry() {
           </button>
         </div>
 
-        {/* Accordion list */}
         {addedPackingListIds.length === 0 ? (
           <div className="py-8 text-center text-gray-400">No packing lists added yet.</div>
         ) : (
@@ -247,7 +334,6 @@ export default function NewDrivingDayEntry() {
 
               return (
                 <div key={listId} className="border border-gray-200 rounded-lg overflow-hidden">
-                  {/* Accordion header */}
                   <button
                     type="button"
                     onClick={() => toggleAccordion(listId)}
@@ -275,7 +361,6 @@ export default function NewDrivingDayEntry() {
                     </div>
                   </button>
 
-                  {/* Accordion body */}
                   {isExpanded && (
                     <div className="px-4 py-2 divide-y divide-gray-100">
                       {pl.items.map((item, idx) => {
@@ -303,7 +388,6 @@ export default function NewDrivingDayEntry() {
                     </div>
                   )}
 
-                  {/* Progress bar */}
                   {totalCount > 0 && (
                     <div className="h-1 bg-gray-100">
                       <div
@@ -319,62 +403,62 @@ export default function NewDrivingDayEntry() {
         )}
       </div>
 
-      {/* ── Drivers -- */}
+      {/* ── Drivers ── */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h2 className="text-lg font-semibold mb-4">Drivers</h2>
 
-        {/* Add driver input */}
         <div className="mb-3 flex gap-2">
-            <input
-              type="text"
-              value={newDriverName}
-              onChange={(e) => setNewDriverName(e.target.value)}
-              placeholder="Add driver name"
-              className="flex-1 border rounded p-2 text-sm"
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), (() => {
-                const name = newDriverName.trim();
-                if (!name) return;
-                const parts = name.split(/\s+/);
-                const firstName = parts[0];
-                const lastName = parts.slice(1).join(' ') || '';
-                const newId = `d_${Date.now().toString(36)}`;
-                const newDriver: Driver = { driverId: newId, firstName, lastName, height: 0, weight: 0, pedalBoxPos: 0 };
-                setDrivers((prev) => [...prev, newDriver]);
-                setSelectedDriverIds((prev) => [...prev, newId]);
-                setNewDriverName('');
-              })())}
-            />
-            <button
-              type="button"
-              onClick={() => {
-                const name = newDriverName.trim();
-                if (!name) return;
-                const parts = name.split(/\s+/);
-                const firstName = parts[0];
-                const lastName = parts.slice(1).join(' ') || '';
-                const newId = `d_${Date.now().toString(36)}`;
-                const newDriver: Driver = { driverId: newId, firstName, lastName, height: 0, weight: 0, pedalBoxPos: 0 };
-                setDrivers((prev) => [...prev, newDriver]);
-                setSelectedDriverIds((prev) => [...prev, newId]);
-                setNewDriverName('');
-              }}
-              className="px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600"
-            >
-              Add
-            </button>
+          <input
+            type="text"
+            value={newDriverName}
+            onChange={(e) => setNewDriverName(e.target.value)}
+            placeholder="Add driver name"
+            className="flex-1 border rounded p-2 text-sm"
+            disabled={isLoading}
+            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), (() => {
+              const name = newDriverName.trim();
+              if (!name) return;
+              const parts = name.split(/\s+/);
+              const firstName = parts[0];
+              const lastName = parts.slice(1).join(' ') || '';
+              const newId = `d_${Date.now().toString(36)}`;
+              const newDriver: Driver = { driverId: newId, firstName, lastName, height: 0, weight: 0, pedalBoxPos: 0 };
+              setDrivers((prev) => [...prev, newDriver]);
+              setSelectedDriverIds((prev) => [...prev, newId]);
+              setNewDriverName('');
+            })())}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              const name = newDriverName.trim();
+              if (!name) return;
+              const parts = name.split(/\s+/);
+              const firstName = parts[0];
+              const lastName = parts.slice(1).join(' ') || '';
+              const newId = `d_${Date.now().toString(36)}`;
+              const newDriver: Driver = { driverId: newId, firstName, lastName, height: 0, weight: 0, pedalBoxPos: 0 };
+              setDrivers((prev) => [...prev, newDriver]);
+              setSelectedDriverIds((prev) => [...prev, newId]);
+              setNewDriverName('');
+            }}
+            className="px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600"
+            disabled={isLoading}
+          >
+            Add
+          </button>
         </div>
 
-        {/* Selected driver chips */}
         <div className="flex gap-2 flex-wrap">
           {selectedDriverIds.map((id) => {
             const d = drivers.find((dr) => dr.driverId === id);
-            if (!d) return null;
+            const displayName = d ? `${d.firstName} ${d.lastName}` : id;
             return (
               <span
                 key={id}
                 className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded flex items-center"
               >
-                {d.firstName} {d.lastName}
+                {displayName}
                 <button
                   type="button"
                   className="ml-1.5 text-blue-800 hover:text-blue-900"
@@ -388,13 +472,12 @@ export default function NewDrivingDayEntry() {
         </div>
       </div>
 
-      {/* ── Associated Issues */}
+      {/* ── Associated Issues ── */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Associated Issues</h2>
         </div>
 
-        {/* Dropdown selector */}
         <div className="relative mb-3">
           <button
             type="button"
@@ -430,7 +513,6 @@ export default function NewDrivingDayEntry() {
           )}
         </div>
 
-        {/* Linked issues table */}
         {linkedIssueIds.length > 0 && (
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mt-3">
             <table className="w-full font-face table-fixed">
@@ -498,22 +580,32 @@ export default function NewDrivingDayEntry() {
         )}
       </div>
 
-      <div className="flex justify-end gap-3">
+      <div className="flex justify-between">
         <button
           type="button"
-          onClick={() => navigate("/past-driving-days")}
-          className="px-4 py-2 border rounded hover:bg-gray-50"
+          onClick={() => setShowDeleteConfirm(true)}
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-red-300"
           disabled={isLoading}
         >
-          Cancel
+          Delete Driving Day
         </button>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
-          disabled={isLoading}
-        >
-          {isLoading ? "Saving..." : "Save Driving Day"}
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => navigate("/past-driving-days")}
+            className="px-4 py-2 border rounded hover:bg-gray-50"
+            disabled={isLoading}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
+            disabled={isLoading}
+          >
+            {isLoading ? "Saving..." : "Update Driving Day"}
+          </button>
+        </div>
       </div>
     </form>
   );

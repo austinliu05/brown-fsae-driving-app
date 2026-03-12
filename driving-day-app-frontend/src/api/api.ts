@@ -1,6 +1,8 @@
 import axios, { Axios } from "axios";
 import { AxiosError } from "axios";
 import { DataCategory } from "../utils/DataTypes";
+import { PackingListEntry } from "../utils/DataTypes";
+import exp from "constants";
 
 export const api = axios.create({
   baseURL: `${process.env.REACT_APP_BACKEND_URL}/api/`,
@@ -86,6 +88,19 @@ export const postIssue = async (issueData: {
 }) => {
   const path = "add-issue/";
   return await postRequest(path, issueData);
+};
+
+export const postDrivingDay = async (drivingDayData: {
+  title: string;
+  date: string;
+  description: string;
+  drivers: string[];
+  packingLists: PackingListEntry[];
+  issues: number[];
+  feedback: number[];
+}) => {
+  const path = "add-driving-day/";
+  return await postRequest(path, drivingDayData);
 };
 
 /**
@@ -237,6 +252,12 @@ export const getAllIssues = async (filters?: {
   return await getRequest(path, searchParams);
 };
 
+export const getAllDrivingDays = async () => {
+  const path = "get-all-driving-days";
+  const searchParams = new URLSearchParams();
+
+  return await getRequest(path, searchParams);
+};
 
 export const getIssuesPaginated = async (filters: {
   pageSize: number,
@@ -284,8 +305,43 @@ export const updateIssue = async (
   }
 };
 
+export const updateDrivingDay = async (
+  drivingDayId: string,
+  drivingDayData: {
+    title?: string;
+    date?: string;
+    description?: string;
+    drivers?: string[];
+    packingLists?: PackingListEntry[];
+    issues?: number[];
+    feedback?: number[];
+  }
+) => {
+  const path = `update-driving-day/${drivingDayId}/`;
+  try {
+    const response = await api.put(path, drivingDayData);
+    return response;
+  } catch (error) {
+    console.error(error);
+    const axiosError = error as AxiosError;
+    return { status: axiosError.status };
+  }
+};
+
 export const deleteIssue = async (issueId: string) => {
   const path = `delete-issue/${issueId}/`;
+  try {
+    const response = await api.delete(path);
+    return response;
+  } catch (error) {
+    console.error(error);
+    const axiosError = error as AxiosError;
+    return { status: axiosError.status };
+  }
+};
+
+export const deleteDrivingDay = async (drivingDayId: string) => {
+  const path = `delete-driving-day/${drivingDayId}/`;
   try {
     const response = await api.delete(path);
     return response;

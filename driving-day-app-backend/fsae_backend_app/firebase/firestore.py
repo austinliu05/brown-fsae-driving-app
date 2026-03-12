@@ -484,3 +484,131 @@ def delete_issue(issue_id: str):
     except Exception as e:
         print(f"An unexpected error occurred while deleting issue: {e}")
         return None
+    
+def get_latest_driving_day_number():
+    try:
+        main_db = db.collection('driving_days')
+        query = main_db.order_by('day_number', direction=firestore.Query.DESCENDING)
+        docs = query.limit(1).stream()
+        for doc in docs:
+            doc_data = doc.to_dict()
+            return doc_data['day_number']
+        return 0
+    except Exception as e:
+        print(f"An unexpected error occurred when pulling latest driving day number: {e}")
+        return None
+
+def add_driving_day(data):
+    try:
+        if not isinstance(data, dict):
+            raise ValueError("Input must be a dictionary.")
+        
+        required_fields = ['title', 'date', 'description']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                raise ValueError(f"Missing or empty required field: {field}")
+
+        new_day_number = int(get_latest_driving_day_number()) + 1
+
+        driving_day_data = {
+            'day_number': new_day_number,
+            'title': data['title'],
+            'date': data['date'],
+            'description': data['description'],
+            'driver_ids': data.get('drivers', []),
+            'packing_lists': data.get('packingLists', []),
+            'issue_ids': data.get('issues', []),
+            'feedback': data.get('feedback', []),
+            'created_at': firestore.SERVER_TIMESTAMP
+        }
+
+        main_db = db.collection('driving_days')
+        doc_ref = main_db.document()
+        doc_ref.set(driving_day_data)
+
+        print(f"Driving day '{data['title']}' added with ID: {doc_ref.id}")
+        return {"driving_day_id": doc_ref.id}
+    
+    except Exception as e:
+        print(f"An unexpected error occurred while adding driving day: {e}")
+        return None
+    
+def get_all_driving_days():
+    """
+    Retrieves all driving days from the 'driving_days' collection.
+
+    Returns:
+        list: List of dictionaries containing driving day data.
+        None: If an error occurs.
+    """
+    try:
+        main_db = db.collection('driving_days')
+        query = main_db.order_by('created_at', direction=firestore.Query.DESCENDING)
+
+        docs = query.stream()
+        
+        driving_days = []
+        for doc in docs:
+            day_data = doc.to_dict()
+            day_data['id'] = doc.id
+            driving_days.append(day_data)
+                        
+        return driving_days
+    
+    except Exception as e:
+        print(f"An error occurred while retrieving driving days: {e}")
+        return None
+
+def update_driving_day(driving_day_id: str, data: dict):
+    try:
+        if not isinstance(data, dict):
+            return None
+        if not driving_day_id:
+            return None
+
+        driving_day_data = {
+            'title': data.get('title'),
+            'date': data.get('date'),
+            'description': data.get('description'),
+            'driver_ids': data.get('drivers'),
+            'packing_lists': data.get('packingLists'),
+            'issue_ids': data.get('issues'),
+            'feedback': data.get('feedback'),
+            'updated_at': firestore.SERVER_TIMESTAMP
+        }
+        driving_day_data = {k: v for k, v in driving_day_data.items() if v is not None}
+
+        main_db = db.collection('driving_days')
+        doc_ref = main_db.document(driving_day_id)
+        
+        # Check if document exists
+        if not doc_ref.get().exists:
+            return None
+        
+        doc_ref.update(driving_day_data)
+        print(f"Driving day {driving_day_id} updated successfully")
+        return {"driving_day_id": driving_day_id}
+
+    except Exception as e:
+        print(f"An unexpected error occurred while updating driving day: {e}")
+        return None
+    
+def delete_driving_day(driving_day_id: str):
+    try:
+        if not driving_day_id:
+            return None
+
+        main_db = db.collection('driving_days')
+        doc_ref = main_db.document(driving_day_id)
+        
+        if not doc_ref.get().exists:
+            print(f"Driving day with ID {driving_day_id} not found.")
+            return None
+        
+        doc_ref.delete()
+        print(f"Driving day {driving_day_id} deleted successfully")
+        return {"driving_day_id": driving_day_id}
+
+    except Exception as e:
+        print(f"An unexpected error occurred while deleting driving day: {e}")
+        return None

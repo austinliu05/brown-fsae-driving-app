@@ -1,29 +1,45 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { DrivingDay, PackingListEntry, MOCK_PACKING_LISTS } from "../../utils/DataTypes";
+import { getAllDrivingDays } from "../../api/api";
 
-interface DrivingDay {
-  id: string;
-  day_number: number;
-  title: string;
-  date: string;
-  description: string;
-  drivers: string[];
-  packingLists: string[];
-  issueCount: number;
+function mapDrivingDay(raw: any): DrivingDay {
+  return {
+    id: raw.id,
+    dayNumber: raw.day_number ?? 0,
+    title: raw.title ?? "",
+    date: raw.date ?? "",
+    description: raw.description ?? "",
+    driverIds: raw.driver_ids ?? [],
+    packingLists: (raw.packing_lists ?? []).map((pl: any): PackingListEntry => ({
+      packingListId: pl.packingListId ?? pl.packing_list_id ?? "",
+      checkedItems: pl.checkedItems ?? pl.checked_items ?? [],
+    })),
+    issueIds: raw.issue_ids ?? [],
+    feedback: raw.feedback ?? [],
+  };
 }
-
-// Placeholder data until backend is connected
-const MOCK_DRIVING_DAYS: DrivingDay[] = [
-  { id: "1", day_number: 1, title: "Pre-Season Shakedown", date: "2026-01-10", description: "Initial test of all systems", drivers: ["Alex Johnson", "Jordan Smith"], packingLists: ["Standard Track Day"], issueCount: 2 },
-  { id: "2", day_number: 2, title: "Brake Tuning Session", date: "2026-01-17", description: "Focus on brake bias adjustment", drivers: ["Casey Williams"], packingLists: ["Minimal Shakedown"], issueCount: 1 },
-  { id: "3", day_number: 3, title: "Endurance Practice", date: "2026-01-24", description: "Full endurance simulation", drivers: ["Alex Johnson", "Morgan Brown", "Jordan Smith"], packingLists: ["Standard Track Day", "Minimal Shakedown"], issueCount: 3 },
-  { id: "4", day_number: 4, title: "Suspension Setup", date: "2026-02-01", description: "Damper and spring tuning", drivers: ["Morgan Brown"], packingLists: ["Minimal Shakedown"], issueCount: 0 },
-  { id: "5", day_number: 5, title: "Full Dress Rehearsal", date: "2026-02-08", description: "Competition-day simulation", drivers: ["Alex Johnson", "Jordan Smith", "Casey Williams", "Morgan Brown"], packingLists: ["Standard Track Day"], issueCount: 4 },
-];
 
 export default function DrivingDaysTable() {
   const navigate = useNavigate();
-  const drivingDays = MOCK_DRIVING_DAYS;
+  const [drivingDays, setDrivingDays] = useState<DrivingDay[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDrivingDays = async () => {
+      try {
+        const response = await getAllDrivingDays();
+        if (response.data?.driving_days) {
+          setDrivingDays(response.data.driving_days.map(mapDrivingDay));
+        }
+      } catch (error) {
+        console.error("Failed to fetch driving days:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDrivingDays();
+  }, []);
 
   return (
     <>
@@ -69,9 +85,10 @@ export default function DrivingDaysTable() {
                   ${index !== drivingDays.length - 1 ? "border-b border-gray-100" : ""}
                 `}
                 tabIndex={0}
+                onClick={() => navigate("/update-driving-day", { state: { drivingDay: day } })}
               >
                 <td className="px-6 py-4 sm:py-3 text-lg font-medium">
-                  {day.day_number}
+                  {day.dayNumber}
                 </td>
                 <td className="px-6 py-4 sm:py-3">
                   <div className="font-medium">{day.title}</div>
@@ -82,32 +99,37 @@ export default function DrivingDaysTable() {
                 </td>
                 <td className="hidden sm:table-cell px-6 py-4 sm:py-3">
                   <div className="flex flex-wrap gap-1">
-                    {day.drivers.map((driver) => (
+                    {day.driverIds.map((driverId) => (
                       <span
-                        key={driver}
+                        key={driverId}
                         className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded"
                       >
-                        {driver}
+                        {driverId}
                       </span>
                     ))}
                   </div>
                 </td>
                 <td className="hidden md:table-cell px-6 py-4 sm:py-3">
                   <div className="flex flex-wrap gap-1">
-                    {day.packingLists.map((pl) => (
-                      <span
-                        key={pl}
-                        className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded"
-                      >
-                        {pl}
-                      </span>
-                    ))}
+                    {day.packingLists.map((entry) => {
+                      const pl = MOCK_PACKING_LISTS.find((p) => p.id === entry.packingListId);
+                      const totalItems = pl?.items.length ?? 0;
+                      const checkedCount = entry.checkedItems.length;
+                      return (
+                        <span
+                          key={entry.packingListId}
+                          className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded"
+                        >
+                          {pl?.name ?? entry.packingListId} ({checkedCount}/{totalItems})
+                        </span>
+                      );
+                    })}
                   </div>
                 </td>
                 <td className="px-6 py-4 sm:py-3 text-gray-600">
-                  {day.issueCount > 0 ? (
+                  {day.issueIds.length > 0 ? (
                     <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded">
-                      {day.issueCount}
+                      {day.issueIds.length}
                     </span>
                   ) : (
                     <span className="text-xs text-gray-400">—</span>
@@ -115,7 +137,14 @@ export default function DrivingDaysTable() {
                 </td>
               </tr>
             ))}
-            {drivingDays.length === 0 && (
+            {isLoading && (
+              <tr>
+                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                  Loading driving days…
+                </td>
+              </tr>
+            )}
+            {!isLoading && drivingDays.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
                   No driving days found. Click "Add" to create one.
