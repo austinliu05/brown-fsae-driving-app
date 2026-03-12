@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import Modal from "../issues-components/Modal";
-import { PackingTemplate } from "./PackingListTable";
+import { PackingTemplate, PackingCategory } from "./PackingListTable";
 
 interface PackingListModalProps {
   template: PackingTemplate;
@@ -23,12 +23,14 @@ export default function PackingListModal({
   const [newItemLabel, setNewItemLabel] = useState("");
   const [listName, setListName] = useState(template.name);
   const [listDescription, setListDescription] = useState(template.description);
+  const [listCategory, setListCategory] = useState<PackingCategory>(template.category);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setItems(template.items);
     setListName(template.name);
     setListDescription(template.description);
+    setListCategory(template.category);
   }, [template.id]);
 
   /* ── Item management ── */
@@ -44,9 +46,19 @@ export default function PackingListModal({
     setItems((prev) => prev.filter((i) => i !== label));
   };
 
+  const handleMoveItem = (index: number, direction: -1 | 1) => {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= items.length) return;
+    setItems((prev) => {
+      const updated = [...prev];
+      [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+      return updated;
+    });
+  };
+
   /* ── Save handlers ── */
   const handleSaveAsCurrent = async () => {
-    await onSaveAsCurrent({ ...template, name: listName, description: listDescription, items });
+    await onSaveAsCurrent({ ...template, name: listName, description: listDescription, items, category: listCategory });
     onClose();
   };
 
@@ -57,6 +69,7 @@ export default function PackingListModal({
       name: listName,
       description: listDescription,
       items,
+      category: listCategory,
     });
     onClose();
   };
@@ -78,12 +91,46 @@ export default function PackingListModal({
             onChange={(e) => setListDescription(e.target.value)}
             className="text-sm text-gray-500 border-b border-transparent hover:border-gray-300 focus:border-blue-400 focus:outline-none bg-transparent w-full mt-1"
           />
+          <div className="flex gap-2 mt-2">
+            {(["Standard", "Subsystems"] as PackingCategory[]).map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setListCategory(cat)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  listCategory === cat
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Item list (no checkboxes — these are blueprint labels) */}
+        {/* Item list  */}
         <div className="space-y-1 mb-2" style={{ maxHeight: "320px", overflowY: "auto" }}>
-          {items.map((label) => (
-            <div key={label} className="flex items-center gap-3 py-2 px-2 rounded hover:bg-gray-50 group">
+          {items.map((label, idx) => (
+            <div key={`${label}-${idx}`} className="flex items-center gap-2 py-2 px-2 rounded hover:bg-gray-50 group">
+              <div className="flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => handleMoveItem(idx, -1)}
+                  disabled={idx === 0}
+                  className="text-gray-400 hover:text-gray-700 disabled:opacity-20 text-[10px] leading-none"
+                  title="Move up"
+                >
+                  ▲
+                </button>
+                <button
+                  onClick={() => handleMoveItem(idx, 1)}
+                  disabled={idx === items.length - 1}
+                  className="text-gray-400 hover:text-gray-700 disabled:opacity-20 text-[10px] leading-none"
+                  title="Move down"
+                >
+                  ▼
+                </button>
+              </div>
               <span className="flex-1 text-sm">{label}</span>
               <button
                 onClick={() => handleDeleteItem(label)}

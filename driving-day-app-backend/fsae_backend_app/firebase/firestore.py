@@ -555,6 +555,8 @@ def add_packing_list(data):
             'name': data['name'],
             'description': data['description'],
             'items': data['items'],
+            'category': data.get('category', 'Subsystems'),
+            'order': data.get('order', new_packing_list_number),
             'packing_list_number': data['packing_list_number'],
             'created_at': firestore.SERVER_TIMESTAMP
         }
@@ -582,7 +584,9 @@ def update_packing_list(packing_list_id: str, data: dict):
         packing_list_data = {
             'name': data.get('name'),
             'description': data.get('description'),
-            'items': data.get('items'), 
+            'items': data.get('items'),
+            'category': data.get('category'),
+            'order': data.get('order'),
             'updated_at': firestore.SERVER_TIMESTAMP
         }
         packing_list_data = {k: v for k, v in packing_list_data.items() if v is not None}

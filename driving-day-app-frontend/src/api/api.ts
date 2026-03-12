@@ -92,6 +92,8 @@ export const postPackingList = async (listData: {
   name: string;
   description: string;
   items: string[];
+  category: string;
+  order?: number;
 }) => {
   const path = "add-packing-list/";
   return await postRequest(path, listData);
@@ -322,6 +324,8 @@ export const updatePackingList = async (
     name?: string;
     description?: string;
     items?: string[];
+    category?: string;
+    order?: number;
   }
 ) => {
   const path = `update-packing-list/${listId}/`;

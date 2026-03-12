@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Modal from "../issues-components/Modal";
-import { PackingTemplate } from "./PackingListTable";
+import { PackingTemplate, PackingCategory } from "./PackingListTable";
 
 interface AddPackingListModalProps {
   isOpen: boolean;
@@ -11,6 +11,7 @@ interface AddPackingListModalProps {
 export default function AddPackingListModal({ isOpen, onClose, onSave }: AddPackingListModalProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState<PackingCategory>("Subsystems");
   const [items, setItems] = useState<string[]>([]);
   const [newItemLabel, setNewItemLabel] = useState("");
 
@@ -32,9 +33,12 @@ export default function AddPackingListModal({ isOpen, onClose, onSave }: AddPack
       name: name.trim(),
       description: description.trim(),
       items,
+      category,
+      order: Date.now(),
     });
     setName("");
     setDescription("");
+    setCategory("Subsystems");
     setItems([]);
     setNewItemLabel("");
     onClose();
@@ -75,6 +79,27 @@ export default function AddPackingListModal({ isOpen, onClose, onSave }: AddPack
             onChange={(e) => setDescription(e.target.value)}
             className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
+        </div>
+
+        {/* Category */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Category</label>
+          <div className="flex gap-2">
+            {(["Standard", "Subsystems"] as PackingCategory[]).map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setCategory(cat)}
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                  category === cat
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Items list */}
