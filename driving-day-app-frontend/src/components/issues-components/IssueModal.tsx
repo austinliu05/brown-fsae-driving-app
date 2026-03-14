@@ -5,7 +5,6 @@ import { availableSubsystems, priorityLevels, statusOptions } from "../../consta
 import { Issue } from "../../utils/DataTypes";
 import AppDataContext from '../contexts/AppDataContext';
 
-
 interface IssueModalProps {
   issue: Issue;
   isOpen: boolean;
