@@ -223,7 +223,7 @@ export default function IssueTable() {
 
                 {/* Driver (hidden on xs) */}
                 <td className="hidden sm:table-cell px-6 py-4 sm:py-3 text-gray-600">
-                  <div className="break-words">{issue.driver}</div>
+                  <div className="break-words">{issue.drivers}</div>
                 </td>
 
                 {/* Date */}
