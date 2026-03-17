@@ -1,4 +1,4 @@
-import axios, { Axios } from "axios";
+import axios from "axios";
 import { AxiosError } from "axios";
 import { DataCategory } from "../utils/DataTypes";
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Modal from "./Modal";
-import { postFiles, postIssue, postS3Image } from "../../api/api";
+import { postIssue, postS3Image } from "../../api/api";
 import { availableSubsystems, priorityLevels, statusOptions } from "../../constants/IssuesConstants";
 import { Issue } from "../../utils/DataTypes";
 
@@ -47,6 +47,7 @@ export default function AddIssueModal({
       })
       setPreview(null);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset form on unmount only
   }, []);
 
   const handleSubsystemToggle = (subsystem: string) => {
