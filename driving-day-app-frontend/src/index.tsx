@@ -10,6 +10,9 @@ import HomePage from "./pages/home-page/HomePage";
 import DevPage from "./pages/dev-page/DevPage";
 import IssuesPage from "./pages/issues-page/IssuesPage";
 import MyAccountPage from "./pages/account-page/MyAccountPage";
+import TimerPage from "./pages/timer-page/TimerPage";
+
+
 
 /**
  * Creates an object that handles routing for all webpages:
@@ -48,6 +51,10 @@ const router = createBrowserRouter([
         path: "/issues",
         element: <IssuesPage />,
       },
+      {
+        path: "/timer",
+        element: <TimerPage />,
+      }
     ],
   },
   {
