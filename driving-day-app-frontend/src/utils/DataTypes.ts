@@ -101,5 +101,7 @@ export const MOCK_PACKING_LISTS: PackingList[] = [
   },
 ];
 
+export const DEFAULT_PACKING_LIST_ID = MOCK_PACKING_LISTS[0]?.id ?? "";
+
 
 

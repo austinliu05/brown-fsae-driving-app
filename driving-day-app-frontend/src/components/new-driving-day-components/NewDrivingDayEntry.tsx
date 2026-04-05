@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Issue, MOCK_PACKING_LISTS } from "../../utils/DataTypes";
+import { DEFAULT_PACKING_LIST_ID, Issue, MOCK_PACKING_LISTS } from "../../utils/DataTypes";
 import { Driver } from "../../utils/DriverType";
 import { getAllIssues, postDrivingDay } from "../../api/api";
 
@@ -21,13 +21,19 @@ export default function NewDrivingDayEntry() {
   // Packing lists — multiple can be added
   // TODO: Replace MOCK_PACKING_LISTS with data from backend
   const availablePackingLists = MOCK_PACKING_LISTS;
-  const [addedPackingListIds, setAddedPackingListIds] = useState<string[]>([]);
+  const [addedPackingListIds, setAddedPackingListIds] = useState<string[]>(
+    DEFAULT_PACKING_LIST_ID ? [DEFAULT_PACKING_LIST_ID] : []
+  );
 
   // Track which accordions are expanded (by packing list id)
-  const [expandedListIds, setExpandedListIds] = useState<Set<string>>(new Set());
+  const [expandedListIds, setExpandedListIds] = useState<Set<string>>(
+    new Set(DEFAULT_PACKING_LIST_ID ? [DEFAULT_PACKING_LIST_ID] : [])
+  );
 
   // Track checked items per packing list: { listId: Set<itemIndex> }
-  const [checkedItems, setCheckedItems] = useState<Record<string, Set<number>>>({});
+  const [checkedItems, setCheckedItems] = useState<Record<string, Set<number>>>(
+    DEFAULT_PACKING_LIST_ID ? { [DEFAULT_PACKING_LIST_ID]: new Set<number>() } : {}
+  );
 
   const handleAddPackingList = (listId: string) => {
     if (!listId || addedPackingListIds.includes(listId)) return;
