@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import PageBase from '../../components/base-components/PageBase';
 import { SpecificDriverProfile } from '../../components/driver-components/SpecificDriverProfile';
 import './MyAccountPage.css';
@@ -32,7 +32,8 @@ const MyAccountPage : React.FC = () => {
   }
 
   useEffect(() => {
-    fetchSpecificDriver()
+    fetchSpecificDriver();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch when currUserId changes
   }, [currUserId])
 
   return (

@@ -5,7 +5,7 @@ import SpecificRunBubble from '../../components/run-components/SpecificRunBubble
 import PageBase from '../../components/base-components/PageBase';
 import './ChartElements.css';
 import { getSpecificRunDataPaginated } from '../../api/api';
-import { CATEGORIES, ReusableChartProps, StandardChartProps } from '../../utils/DataTypes';
+import { StandardChartProps } from '../../utils/DataTypes';
 import { CHARTS, ChartCategory } from '../../utils/ChartTypes';
 import Pagination from '../../components/pagination-components/Pagination';
 
@@ -24,7 +24,7 @@ const RunDetailPage: React.FC = () => {
     /**
      * useState for Run Data metadata
      */
-    const [isLoading, setLoading] = useState<boolean>(true);
+    const [isLoading] = useState<boolean>(true);
     const [isUpdating, setUpdating] = useState<boolean>(false);
     const [runDate, setRunDate] = useState<string>("")
     const [driverId, setDriverId] = useState<string>("")
@@ -44,7 +44,7 @@ const RunDetailPage: React.FC = () => {
     const [keyPoints, setKeyPoints] = useState<JSON>(JSON.parse("{}"))
     // States to store the currently-toggled column
     const [verticalLabel, setVerticalLabel] = useState<string>("")
-    const [horizontalLabel, setHorizontalLabel] = useState<string>("Time")
+    const [horizontalLabel] = useState<string>("Time")
     
 
     /**
@@ -137,6 +137,7 @@ const RunDetailPage: React.FC = () => {
         }
 
         fetchSpecificRunDataPaginated("", "")
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- initial fetch on mount only
     }, [])
 
     if (isLoading) {

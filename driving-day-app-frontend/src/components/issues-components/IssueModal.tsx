@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useContext} from "react";
 import Modal from "./Modal";
 import { updateIssue, deleteIssue } from "../../api/api";
 import { availableSubsystems, priorityLevels, statusOptions } from "../../constants/IssuesConstants";
 import { Issue } from "../../utils/DataTypes";
+import AppDataContext from '../contexts/AppDataContext';
 
 interface IssueModalProps {
   issue: Issue;
@@ -21,12 +22,15 @@ export default function IssueModal({
   const [editMode, setEditMode] = useState(false);
   const [editedIssue, setEditedIssue] = useState<Issue>(issue);
   const [isSubsystemDropdownOpen, setIsSubsystemDropdownOpen] = useState(false);
+  const [isDriversDropdownOpen, setIsDriverDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); // Added for delete confirmation
 
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imgError, setImgError] = useState<string | null>(null);
+  const { drivers } = useContext(AppDataContext); //for testing purposes
+
 
   useEffect(() => {
     // Clear the current Image URL because no issue is selected
@@ -58,6 +62,22 @@ export default function IssueModal({
   useEffect(() => {
     setEditedIssue(issue);
   }, [issue]);
+
+  const handleDriversToggle = (driver: string) => {
+    setEditedIssue((prevIssue) => {
+      if (prevIssue.drivers.includes(driver)) {
+        return {
+          ...prevIssue,
+          drivers: prevIssue.drivers.filter((s) => s !== driver),
+        };
+      } else {
+        return {
+          ...prevIssue,
+          drivers: [...prevIssue.drivers, driver],
+        };
+      }
+    });
+  };
 
   const handleSubsystemToggle = (subsystem: string) => {
     setEditedIssue((prevIssue) => {
@@ -113,7 +133,7 @@ export default function IssueModal({
     try {
       
       const response = await updateIssue(editedIssue.id, {
-        driver: editedIssue.driver,
+        driver: editedIssue.drivers,
         date: editedIssue.date,
         synopsis: editedIssue.synopsis,
         subsystems: editedIssue.subsystems,
@@ -197,18 +217,65 @@ export default function IssueModal({
                       <label className="block text-sm font-medium mb-1">
                         Driver
                       </label>
-                      <input
-                        type="text"
-                        value={editedIssue.driver}
-                        onChange={(e) =>
-                          setEditedIssue({
-                            ...editedIssue,
-                            driver: e.target.value,
-                          })
+                      <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setIsDriverDropdownOpen(!isDriversDropdownOpen)
                         }
-                        className="w-full border p-2 rounded"
+                        className="w-full border rounded p-2 text-left flex justify-between items-center"
                         disabled={isLoading}
-                      />
+                      >
+                        <span>
+                          {editedIssue.drivers.length > 0
+                            ? `Selected (${editedIssue.drivers.length})`
+                            : "Select subsystems"}
+                        </span>
+                        <span>{isDriversDropdownOpen ? "▲" : "▼"}</span>
+                      </button>
+
+                      {isDriversDropdownOpen && (
+                        <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow-lg max-h-60 overflow-y-auto">
+                          {drivers.map((driver) => (
+                            <div
+                              key={driver.driverId}
+                              className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
+                              onClick={() => handleDriversToggle(driver.firstName + " " + driver.lastName)}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={editedIssue.drivers.includes(
+                                  driver.firstName + " " + driver.lastName
+                                )}
+                                onChange={() => {}}
+                                className="mr-2"
+                                disabled={isLoading}
+                              />
+                              {driver.firstName + " " + driver.lastName}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2 flex-wrap mt-2">
+                      {editedIssue.drivers.map((driver) => (
+                        <span
+                          key={driver}
+                          className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded flex items-center"
+                        >
+                          {driver}
+                          <button
+                            type="button"
+                            className="ml-1.5 text-blue-800 hover:text-blue-900"
+                            onClick={() => handleDriversToggle(driver)}
+                            disabled={isLoading}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">
@@ -429,7 +496,7 @@ export default function IssueModal({
             )}
             <div className="space-y-4">
               <p className="break-words">
-                <strong>Driver:</strong> {editedIssue.driver}
+                <strong>Driver:</strong> {editedIssue.drivers}
               </p>
               <p>
                 <strong>Date:</strong> {editedIssue.date}
