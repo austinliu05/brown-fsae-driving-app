@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Issue, DrivingDay, MOCK_PACKING_LISTS } from "../../utils/DataTypes";
-import { Driver } from "../../utils/DriverType";
 import { getAllIssues, updateDrivingDay, deleteDrivingDay } from "../../api/api";
 
 export default function UpdateDrivingDayEntry() {
@@ -27,8 +26,7 @@ export default function UpdateDrivingDayEntry() {
   const [checkedItems, setCheckedItems] = useState<Record<string, Set<number>>>({});
 
   // Drivers
-  const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [selectedDriverIds, setSelectedDriverIds] = useState<string[]>([]);
+  const [selectedDrivers, setSelectedDrivers] = useState<string[]>([]);
   const [newDriverName, setNewDriverName] = useState("");
 
   // Issues
@@ -47,7 +45,7 @@ export default function UpdateDrivingDayEntry() {
     setTitle(drivingDay.title);
     setDate(drivingDay.date);
     setDescription(drivingDay.description);
-    setSelectedDriverIds(drivingDay.driverIds);
+    setSelectedDrivers(drivingDay.drivers);
 
     // Pre-populate packing lists
     const plIds = drivingDay.packingLists.map((pl) => pl.packingListId);
@@ -124,10 +122,15 @@ export default function UpdateDrivingDayEntry() {
 
   // ── Other handlers ─────
 
-  const toggleDriver = (driverId: string) => {
-    setSelectedDriverIds((prev) =>
-      prev.includes(driverId) ? prev.filter((id) => id !== driverId) : [...prev, driverId]
-    );
+  const removeDriver = (driverName: string) => {
+    setSelectedDrivers((prev) => prev.filter((name) => name !== driverName));
+  };
+
+  const addDriver = () => {
+    const name = newDriverName.trim();
+    if (!name || selectedDrivers.includes(name)) return;
+    setSelectedDrivers((prev) => [...prev, name]);
+    setNewDriverName("");
   };
 
   const toggleIssue = (issueId: string) => {
@@ -156,7 +159,7 @@ export default function UpdateDrivingDayEntry() {
         title,
         date,
         description,
-        drivers: selectedDriverIds,
+        drivers: selectedDrivers,
         packingLists: packingListEntries,
         issues: linkedIssueIds.map((id) => {
           const issue = allIssues.find((i) => i.id === id);
@@ -415,33 +418,16 @@ export default function UpdateDrivingDayEntry() {
             placeholder="Add driver name"
             className="flex-1 border rounded p-2 text-sm"
             disabled={isLoading}
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), (() => {
-              const name = newDriverName.trim();
-              if (!name) return;
-              const parts = name.split(/\s+/);
-              const firstName = parts[0];
-              const lastName = parts.slice(1).join(' ') || '';
-              const newId = `d_${Date.now().toString(36)}`;
-              const newDriver: Driver = { driverId: newId, firstName, lastName, height: 0, weight: 0, pedalBoxPos: 0 };
-              setDrivers((prev) => [...prev, newDriver]);
-              setSelectedDriverIds((prev) => [...prev, newId]);
-              setNewDriverName('');
-            })())}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addDriver();
+              }
+            }}
           />
           <button
             type="button"
-            onClick={() => {
-              const name = newDriverName.trim();
-              if (!name) return;
-              const parts = name.split(/\s+/);
-              const firstName = parts[0];
-              const lastName = parts.slice(1).join(' ') || '';
-              const newId = `d_${Date.now().toString(36)}`;
-              const newDriver: Driver = { driverId: newId, firstName, lastName, height: 0, weight: 0, pedalBoxPos: 0 };
-              setDrivers((prev) => [...prev, newDriver]);
-              setSelectedDriverIds((prev) => [...prev, newId]);
-              setNewDriverName('');
-            }}
+            onClick={addDriver}
             className="px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600"
             disabled={isLoading}
           >
@@ -450,19 +436,17 @@ export default function UpdateDrivingDayEntry() {
         </div>
 
         <div className="flex gap-2 flex-wrap">
-          {selectedDriverIds.map((id) => {
-            const d = drivers.find((dr) => dr.driverId === id);
-            const displayName = d ? `${d.firstName} ${d.lastName}` : id;
+          {selectedDrivers.map((name) => {
             return (
               <span
-                key={id}
+                key={name}
                 className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded flex items-center"
               >
-                {displayName}
+                {name}
                 <button
                   type="button"
                   className="ml-1.5 text-blue-800 hover:text-blue-900"
-                  onClick={() => toggleDriver(id)}
+                  onClick={() => removeDriver(name)}
                 >
                   ×
                 </button>

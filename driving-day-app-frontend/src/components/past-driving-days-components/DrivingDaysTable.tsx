@@ -10,7 +10,7 @@ function mapDrivingDay(raw: any): DrivingDay {
     title: raw.title ?? "",
     date: raw.date ?? "",
     description: raw.description ?? "",
-    driverIds: raw.driver_ids ?? [],
+    drivers: raw.drivers ?? raw.driver_ids ?? [],
     packingLists: (raw.packing_lists ?? []).map((pl: any): PackingListEntry => ({
       packingListId: pl.packingListId ?? pl.packing_list_id ?? "",
       checkedItems: pl.checkedItems ?? pl.checked_items ?? [],
@@ -99,12 +99,12 @@ export default function DrivingDaysTable() {
                 </td>
                 <td className="hidden sm:table-cell px-6 py-4 sm:py-3">
                   <div className="flex flex-wrap gap-1">
-                    {day.driverIds.map((driverId) => (
+                    {day.drivers.map((driverName) => (
                       <span
-                        key={driverId}
+                        key={driverName}
                         className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded"
                       >
-                        {driverId}
+                        {driverName}
                       </span>
                     ))}
                   </div>

@@ -58,7 +58,7 @@ export interface DrivingDay {
     title: string;
     date: string;
     description: string;
-    driverIds: string[];
+  drivers: string[];
     packingLists: PackingListEntry[];
     issueIds: string[];
     feedback: string[];
@@ -101,7 +101,7 @@ export const MOCK_PACKING_LISTS: PackingList[] = [
   },
 ];
 
-export const DEFAULT_PACKING_LIST_ID = MOCK_PACKING_LISTS[0]?.id ?? "";
+export const GENERAL_PACKING_LIST_ID = MOCK_PACKING_LISTS[0]?.id ?? "";
 
 
 

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DEFAULT_PACKING_LIST_ID, Issue, MOCK_PACKING_LISTS } from "../../utils/DataTypes";
-import { Driver } from "../../utils/DriverType";
+import { GENERAL_PACKING_LIST_ID, Issue, MOCK_PACKING_LISTS } from "../../utils/DataTypes";
 import { getAllIssues, postDrivingDay } from "../../api/api";
 
 export default function NewDrivingDayEntry() {
@@ -18,21 +17,20 @@ export default function NewDrivingDayEntry() {
   // Backend issues
   const [backendIssues, setBackendIssues] = useState<Issue[]>([]);
 
-  // Packing lists — multiple can be added
-  // TODO: Replace MOCK_PACKING_LISTS with data from backend
+  // Packing lists 
   const availablePackingLists = MOCK_PACKING_LISTS;
   const [addedPackingListIds, setAddedPackingListIds] = useState<string[]>(
-    DEFAULT_PACKING_LIST_ID ? [DEFAULT_PACKING_LIST_ID] : []
+    GENERAL_PACKING_LIST_ID ? [GENERAL_PACKING_LIST_ID] : []
   );
 
   // Track which accordions are expanded (by packing list id)
   const [expandedListIds, setExpandedListIds] = useState<Set<string>>(
-    new Set(DEFAULT_PACKING_LIST_ID ? [DEFAULT_PACKING_LIST_ID] : [])
+    new Set(GENERAL_PACKING_LIST_ID ? [GENERAL_PACKING_LIST_ID] : [])
   );
 
   // Track checked items per packing list: { listId: Set<itemIndex> }
   const [checkedItems, setCheckedItems] = useState<Record<string, Set<number>>>(
-    DEFAULT_PACKING_LIST_ID ? { [DEFAULT_PACKING_LIST_ID]: new Set<number>() } : {}
+    GENERAL_PACKING_LIST_ID ? { [GENERAL_PACKING_LIST_ID]: new Set<number>() } : {}
   );
 
   const handleAddPackingList = (listId: string) => {
@@ -65,8 +63,7 @@ export default function NewDrivingDayEntry() {
   };
 
   // Drivers
-  const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [selectedDriverIds, setSelectedDriverIds] = useState<string[]>([]);
+  const [selectedDrivers, setSelectedDrivers] = useState<string[]>([]);
   const [newDriverName, setNewDriverName] = useState("");
 
   // Issues
@@ -91,10 +88,15 @@ export default function NewDrivingDayEntry() {
 
   // ── Handlers ─────
 
-  const toggleDriver = (driverId: string) => {
-    setSelectedDriverIds((prev) =>
-      prev.includes(driverId) ? prev.filter((id) => id !== driverId) : [...prev, driverId]
-    );
+  const removeDriver = (driverName: string) => {
+    setSelectedDrivers((prev) => prev.filter((name) => name !== driverName));
+  };
+
+  const addDriver = () => {
+    const name = newDriverName.trim();
+    if (!name || selectedDrivers.includes(name)) return;
+    setSelectedDrivers((prev) => [...prev, name]);
+    setNewDriverName("");
   };
 
   const toggleIssue = (issueId: string) => {
@@ -123,7 +125,7 @@ export default function NewDrivingDayEntry() {
         title,
         date,
         description,
-        drivers: selectedDriverIds,
+        drivers: selectedDrivers,
         packingLists: packingListEntries,
         issues: linkedIssueIds.map((id) => {
           const issue = allIssues.find((i) => i.id === id);
@@ -337,33 +339,16 @@ export default function NewDrivingDayEntry() {
               onChange={(e) => setNewDriverName(e.target.value)}
               placeholder="Add driver name"
               className="flex-1 border rounded p-2 text-sm"
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), (() => {
-                const name = newDriverName.trim();
-                if (!name) return;
-                const parts = name.split(/\s+/);
-                const firstName = parts[0];
-                const lastName = parts.slice(1).join(' ') || '';
-                const newId = `d_${Date.now().toString(36)}`;
-                const newDriver: Driver = { driverId: newId, firstName, lastName, height: 0, weight: 0, pedalBoxPos: 0 };
-                setDrivers((prev) => [...prev, newDriver]);
-                setSelectedDriverIds((prev) => [...prev, newId]);
-                setNewDriverName('');
-              })())}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addDriver();
+                }
+              }}
             />
             <button
               type="button"
-              onClick={() => {
-                const name = newDriverName.trim();
-                if (!name) return;
-                const parts = name.split(/\s+/);
-                const firstName = parts[0];
-                const lastName = parts.slice(1).join(' ') || '';
-                const newId = `d_${Date.now().toString(36)}`;
-                const newDriver: Driver = { driverId: newId, firstName, lastName, height: 0, weight: 0, pedalBoxPos: 0 };
-                setDrivers((prev) => [...prev, newDriver]);
-                setSelectedDriverIds((prev) => [...prev, newId]);
-                setNewDriverName('');
-              }}
+              onClick={addDriver}
               className="px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600"
             >
               Add
@@ -372,19 +357,17 @@ export default function NewDrivingDayEntry() {
 
         {/* Selected driver chips */}
         <div className="flex gap-2 flex-wrap">
-          {selectedDriverIds.map((id) => {
-            const d = drivers.find((dr) => dr.driverId === id);
-            if (!d) return null;
+          {selectedDrivers.map((name) => {
             return (
               <span
-                key={id}
+                key={name}
                 className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded flex items-center"
               >
-                {d.firstName} {d.lastName}
+                {name}
                 <button
                   type="button"
                   className="ml-1.5 text-blue-800 hover:text-blue-900"
-                  onClick={() => toggleDriver(id)}
+                  onClick={() => removeDriver(name)}
                 >
                   ×
                 </button>
