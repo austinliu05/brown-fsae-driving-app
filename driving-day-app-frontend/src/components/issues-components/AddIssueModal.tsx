@@ -36,6 +36,7 @@ export default function AddIssueModal({
   const [preview, setPreview] = useState<string | null>(null);
   const { drivers } = useContext(AppDataContext); //for testing purposes
 
+  // Reset form on close (mount-only cleanup; today is stable for session)
   useEffect(() => {
     return () => {
       setIssue({
@@ -50,7 +51,6 @@ export default function AddIssueModal({
       })
       setPreview(null);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset form on unmount only
   }, []);
 
   const handleDriversToggle = (driver: string) => {

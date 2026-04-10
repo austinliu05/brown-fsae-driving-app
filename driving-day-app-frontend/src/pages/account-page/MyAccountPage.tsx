@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useCallback } from 'react';
 import PageBase from '../../components/base-components/PageBase';
 import { SpecificDriverProfile } from '../../components/driver-components/SpecificDriverProfile';
 import './MyAccountPage.css';
@@ -20,8 +20,8 @@ const MyAccountPage : React.FC = () => {
     }
   }
 
-  const fetchSpecificDriver = async () => {
-    if(currUserId){
+  const fetchSpecificDriver = useCallback(async () => {
+    if (currUserId) {
       const response = await getSpecificDriver({
         driverId: currUserId
       })
@@ -29,11 +29,10 @@ const MyAccountPage : React.FC = () => {
         setCurrUser(response.data.driver)
       }
     }
-  }
+  }, [currUserId, setCurrUser])
 
   useEffect(() => {
     fetchSpecificDriver();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch when currUserId changes
   }, [currUserId])
 
   return (

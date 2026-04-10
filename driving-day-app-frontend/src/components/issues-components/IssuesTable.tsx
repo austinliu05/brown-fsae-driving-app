@@ -132,7 +132,6 @@ export default function IssueTable() {
 
   useEffect(() => {
     handleSave();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-fetch when filters change
   }, [subsystemFilt, priorityFilt, statusFilt]);
 
   return (
