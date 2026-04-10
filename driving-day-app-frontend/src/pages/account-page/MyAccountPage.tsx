@@ -32,8 +32,8 @@ const MyAccountPage : React.FC = () => {
   }, [currUserId, setCurrUser])
 
   useEffect(() => {
-    fetchSpecificDriver()
-  }, [fetchSpecificDriver])
+    fetchSpecificDriver();
+  }, [currUserId])
 
   return (
     <PageBase style={{

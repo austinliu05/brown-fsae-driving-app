@@ -11,7 +11,6 @@ import { getGeneralRunData } from "../../api/api";
 const RunSummaryPage: React.FC = () => {
 
   const navigate = useNavigate();
-
   // JSON array of general run data
   const [generalRuns, setGeneralRuns] = useState<any[]>([])
   

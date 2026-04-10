@@ -24,7 +24,7 @@ const RunDetailPage: React.FC = () => {
     /**
      * useState for Run Data metadata
      */
-    const [isLoading, setLoading] = useState<boolean>(true);
+    const [isLoading] = useState<boolean>(true);
     const [isUpdating, setUpdating] = useState<boolean>(false);
     const [runDate, setRunDate] = useState<string>("")
     const [driverId, setDriverId] = useState<string>("")
@@ -93,7 +93,7 @@ const RunDetailPage: React.FC = () => {
      */
     const fetchSpecificRunDataPaginated = async (startAfterDoc : string, endBeforeDoc: string) => {
         setUpdating(true)
-        setLoading(true)
+        // setLoading(true)
 
         const response = await getSpecificRunDataPaginated({
             runTitle: runTitle || "sample_data",
@@ -119,7 +119,7 @@ const RunDetailPage: React.FC = () => {
         }
 
         setUpdating(false)
-        setLoading(false)
+        // setLoading(false)
     }
 
     // TODO: Create fetch API call to obtain run meta-data by runTitle (called when necessary)

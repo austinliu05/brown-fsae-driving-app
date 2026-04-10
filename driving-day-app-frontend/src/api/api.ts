@@ -78,7 +78,7 @@ export const postS3Image = async (formData: FormData, id: string) => {
 };
 
 export const postIssue = async (issueData: {
-  driver: string;
+  drivers: string[];
   date: string;
   synopsis: string;
   subsystems: string[];
@@ -295,7 +295,7 @@ export const getFeedbackPaginated = async (filters: {
 export const updateIssue = async (
   issueId: string,
   issueData: {
-    driver?: string;
+    driver?: string[];
     date?: string;
     synopsis?: string;
     subsystems?: string[];

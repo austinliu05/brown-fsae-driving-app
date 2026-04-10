@@ -30,7 +30,7 @@ export interface StandardChartProps{
 export interface Issue{
     id: string;
     issue_number: number;
-    driver: string;
+    drivers: string[];
     date: string;
     synopsis: string;
     subsystems: string[];
