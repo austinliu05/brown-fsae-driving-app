@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Modal from "./Modal";
-import { postFiles, postIssue, postS3Image } from "../../api/api";
+import { postIssue, postS3Image } from "../../api/api";
 import { availableSubsystems, priorityLevels, statusOptions } from "../../constants/IssuesConstants";
 import { Issue } from "../../utils/DataTypes";
 
@@ -33,6 +33,7 @@ export default function AddIssueModal({
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
+  // Reset form on close (mount-only cleanup; today is stable for session)
   useEffect(() => {
     return () => {
       setIssue({
@@ -47,6 +48,7 @@ export default function AddIssueModal({
       })
       setPreview(null);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- unmount cleanup only
   }, []);
 
   const handleSubsystemToggle = (subsystem: string) => {

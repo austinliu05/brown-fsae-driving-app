@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import FeedbackModal from "./FeedbackModal";
 import AddFeedbackModal from "./AddFeedbackModal";
 import { getFeedbackPaginated, getAllFeedback } from "../../api/api";
-import AppDataContext from '../contexts/AppDataContext';
 import Pagination from "../pagination-components/Pagination";
 import { Feedback } from "../../utils/DataTypes";
 import { Stack } from "../../utils/CustomDataStructs";
@@ -13,8 +12,6 @@ const globalPageSize = 20
 const pageStartStack = new Stack<string>()
 
 export default function FeedbackTable() {
-  const { drivers } = useContext(AppDataContext)
-
   const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [groupByDate, setGroupByDate] = useState<boolean>(false);
   const [dateFilter, setDateFilter] = useState<string>("");

@@ -166,4 +166,5 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({ q, value = '', onC
   )
 }
 
-export default {};
+const feedbackHelpersDefault = {};
+export default feedbackHelpersDefault;

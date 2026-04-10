@@ -5,7 +5,7 @@ import SpecificRunBubble from '../../components/run-components/SpecificRunBubble
 import PageBase from '../../components/base-components/PageBase';
 import './ChartElements.css';
 import { getSpecificRunDataPaginated } from '../../api/api';
-import { CATEGORIES, ReusableChartProps, StandardChartProps } from '../../utils/DataTypes';
+import { StandardChartProps } from '../../utils/DataTypes';
 import { CHARTS, ChartCategory } from '../../utils/ChartTypes';
 import Pagination from '../../components/pagination-components/Pagination';
 
@@ -44,7 +44,7 @@ const RunDetailPage: React.FC = () => {
     const [keyPoints, setKeyPoints] = useState<JSON>(JSON.parse("{}"))
     // States to store the currently-toggled column
     const [verticalLabel, setVerticalLabel] = useState<string>("")
-    const [horizontalLabel, setHorizontalLabel] = useState<string>("Time")
+    const [horizontalLabel] = useState<string>("Time")
     
 
     /**
@@ -93,7 +93,8 @@ const RunDetailPage: React.FC = () => {
      */
     const fetchSpecificRunDataPaginated = async (startAfterDoc : string, endBeforeDoc: string) => {
         setUpdating(true)
-        
+        setLoading(true)
+
         const response = await getSpecificRunDataPaginated({
             runTitle: runTitle || "sample_data",
             pageSize: globalPageSize,
@@ -118,6 +119,7 @@ const RunDetailPage: React.FC = () => {
         }
 
         setUpdating(false)
+        setLoading(false)
     }
 
     // TODO: Create fetch API call to obtain run meta-data by runTitle (called when necessary)
@@ -137,6 +139,7 @@ const RunDetailPage: React.FC = () => {
         }
 
         fetchSpecificRunDataPaginated("", "")
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- initial load + location state hydration
     }, [])
 
     if (isLoading) {

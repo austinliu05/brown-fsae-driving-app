@@ -1,7 +1,6 @@
-import axios, { Axios } from "axios";
+import axios from "axios";
 import { AxiosError } from "axios";
 import { DataCategory, ResponseValue } from "../utils/DataTypes";
-import exp from "constants";
 
 export const api = axios.create({
   baseURL: `${process.env.REACT_APP_BACKEND_URL}/api/`,

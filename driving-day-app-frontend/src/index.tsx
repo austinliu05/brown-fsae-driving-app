@@ -1,6 +1,5 @@
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import App from "./App";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import RunSummaryPage from "./pages/run-summary-page/RunSummaryPage";
 import RunDetailPage from "./pages/run-detail-page/RunDetailPage";
