@@ -233,7 +233,7 @@ export default function FeedbackTable() {
                         <colgroup>
                           <col style={{ width: "25%" }} />
                           <col style={{ width: "25%" }} />
-                          <col style={{ width: "50%" }} />
+                          <col style={{ width: "25%" }} />
                         </colgroup>
                         <thead>
                           <tr className="border-b border-gray-100">
@@ -268,7 +268,6 @@ export default function FeedbackTable() {
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden w-full">
           <table className="w-full min-w-full font-face table-auto">
             <colgroup>
-              <col style={{ width: "25%" }} />
               <col style={{ width: "25%" }} />
               <col style={{ width: "25%" }} />
               <col style={{ width: "25%" }} />
