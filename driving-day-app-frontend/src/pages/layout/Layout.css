@@ -15,13 +15,11 @@
 
 @layer base {
     .wrapper {
-        display: flex;
         width: 100%;
     }
 
     .page-content-main {
         width: 100%;
-        margin-left: 16rem;
     }
 
     .page-content-body{
