@@ -1,0 +1,34 @@
+@tailwind components;
+@tailwind base;
+@tailwind utilities;
+
+@layer base{
+	input[type="text"],
+	input[type="date"],
+	textarea,
+	select {
+		border-radius: 0.25rem;
+		margin: 0.25rem 0;
+		padding: 0.4rem 0.5rem;
+		border: lightgrey 1px solid;
+		color: black;
+	}
+
+	.disabled-upload-button,
+	.upload-button {
+		color: white;
+		padding: 0.5rem 1rem;
+		border-radius: 0.5rem;
+		width: 9rem;
+	}
+
+	.upload-button:hover {
+		opacity: 0.85;
+	}
+}
+
+/* small tweaks to match modal card look */
+@layer utilities {
+  .bg-white { background-color: #ffffff; }
+  .shadow { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+}

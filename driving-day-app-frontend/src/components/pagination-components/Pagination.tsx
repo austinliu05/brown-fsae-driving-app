@@ -1,5 +1,4 @@
-import React, {useState, useEffect, useContext} from 'react'
-import ChartContext from '../contexts/ChartContext'
+import React from 'react'
 import './Pagination.css'
 
 interface PaginationProps {
