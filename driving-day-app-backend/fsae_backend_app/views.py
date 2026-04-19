@@ -462,6 +462,48 @@ async def get_all_packing_lists_call(request):
             "packing_lists": packing_lists,
             "message": "Packing lists retrieved successfully",
             "count": len(packing_lists)
+            }, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            "error": f"An unexpected error occurred: {str(e)}"
+        }, status=500)
+    
+@csrf_exempt
+async def add_feedback_call(request):
+    """
+    Handles adding a new feedback via a POST request.
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        result = await sync_to_async(add_feedback)(data)
+        
+        if result is None:
+            return JsonResponse({"error": "Failed to create feedback"}, status=400)
+            
+        return JsonResponse({
+            "message": "Feedback created successfully!",
+            "feedback_id": result["feedback_id"]
+        }, status=201)
+        
+    except Exception as e:
+        return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
+
+@require_GET
+async def get_all_feedback_call(request):
+    """
+    Retrieves all feedback
+    """
+    try:
+        feedback = await sync_to_async(get_all_feedback)()
+        
+        if feedback is None:
+            return JsonResponse({"error": "Failed to retrieve feedback"}, status=500)
+        
+        return JsonResponse({
+            "feedback": feedback,
+            "message": "Feedback retrieved successfully",
+            "count": len(feedback)
         }, status=200)
         
     except Exception as e:
@@ -504,6 +546,42 @@ async def update_packing_list_call(request, packing_list_id):
             return JsonResponse({
                 "message": "Packing list updated successfully!",
                 "packing_list_id": result["packing_list_id"]
+                }, status=200)
+            
+        except Exception as e:
+            return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
+        
+    return JsonResponse({"error": "Invalid request method. Use PUT."}, status=400)
+
+@require_GET
+async def get_feedback_paginated_call(request):
+    """
+    Retrieves a specific page of feedback entries
+    """
+    try:
+        page_size = request.GET.get('pageSize')
+        start_at_doc = request.GET.get('startAtDoc')
+        start_after_doc = request.GET.get('startAfterDoc')
+
+        data = await sync_to_async(get_feedback_paginated)(page_size, start_at_doc or "", start_after_doc or "")
+
+        return JsonResponse({"feedbackPaginated": data}, status=200)
+    except Exception as e:
+        return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
+
+@csrf_exempt
+async def update_feedback_call(request, feedback_id):
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            result = await sync_to_async(update_feedback)(feedback_id, data)
+            
+            if result is None:
+                return JsonResponse({"error": "Failed to update feedback or feedback not found"}, status=400)
+                
+            return JsonResponse({
+                "message": "Feedback updated successfully!",
+                "feedback_id": result["feedback_id"]
             }, status=200)
             
         except Exception as e:
@@ -542,6 +620,29 @@ async def delete_packing_list_call(request, packing_list_id):
             return JsonResponse({
                 "message": "Packing list deleted successfully!",
                 "packing_list_id": packing_list_id
+            }, status=200)
+            
+        except Exception as e:
+            return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
+        
+    return JsonResponse({"error": "Invalid request method. Use DELETE."}, status=400)
+
+async def delete_feedback_call(request, feedback_id):
+    """
+    Handles deleting a feedback element via a DELETE request.
+    """
+    if request.method == 'DELETE':
+        try:
+            result = await sync_to_async(delete_feedback)(feedback_id)
+            
+            if result is None:
+                return JsonResponse({"error": "Failed to delete feedback or feedback not found"}, status=404)
+
+            await sync_to_async(delete_s3_folder)(f"feedback/{feedback_id}/")
+        
+            return JsonResponse({
+                "message": "Feedback deleted successfully!",
+                "feedback_id": feedback_id
             }, status=200)
             
         except Exception as e:

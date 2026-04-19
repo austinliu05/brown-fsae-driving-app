@@ -1,6 +1,5 @@
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import App from "./App";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import RunSummaryPage from "./pages/run-summary-page/RunSummaryPage";
 import RunDetailPage from "./pages/run-detail-page/RunDetailPage";
@@ -12,6 +11,7 @@ import DevPage from "./pages/dev-page/DevPage";
 import IssuesPage from "./pages/issues-page/IssuesPage";
 import MyAccountPage from "./pages/account-page/MyAccountPage";
 import PackingListPage from "./pages/packing-list-page/PackingListPage";
+import FeedbackPage from "./pages/driver-feedback-page/FeedbackPage";
 
 /**
  * Creates an object that handles routing for all webpages:
@@ -55,6 +55,10 @@ const router = createBrowserRouter([
         element: <PackingListPage />,
 
       },
+      {
+        path: "/feedback",
+        element: <FeedbackPage />,
+      }
     ],
   },
   {

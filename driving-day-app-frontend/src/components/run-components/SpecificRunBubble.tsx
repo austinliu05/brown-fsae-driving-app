@@ -1,5 +1,4 @@
-import React, {useState, useEffect} from "react";
-import { Driver } from "../../utils/DriverType";
+import React, { useEffect } from "react";
 
 
 interface SpecificRunBubbleProps {
