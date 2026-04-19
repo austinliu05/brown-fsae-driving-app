@@ -93,7 +93,8 @@ const RunDetailPage: React.FC = () => {
      */
     const fetchSpecificRunDataPaginated = async (startAfterDoc : string, endBeforeDoc: string) => {
         setUpdating(true)
-        
+        // setLoading(true)
+
         const response = await getSpecificRunDataPaginated({
             runTitle: runTitle || "sample_data",
             pageSize: globalPageSize,
@@ -118,6 +119,7 @@ const RunDetailPage: React.FC = () => {
         }
 
         setUpdating(false)
+        // setLoading(false)
     }
 
     // TODO: Create fetch API call to obtain run meta-data by runTitle (called when necessary)
@@ -137,7 +139,7 @@ const RunDetailPage: React.FC = () => {
         }
 
         fetchSpecificRunDataPaginated("", "")
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- initial fetch on mount only
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- initial load + location state hydration
     }, [])
 
     if (isLoading) {

@@ -11,8 +11,7 @@ import DevPage from "./pages/dev-page/DevPage";
 import IssuesPage from "./pages/issues-page/IssuesPage";
 import MyAccountPage from "./pages/account-page/MyAccountPage";
 import TimerPage from "./pages/timer-page/TimerPage";
-
-
+import FeedbackPage from "./pages/driver-feedback-page/FeedbackPage";
 
 /**
  * Creates an object that handles routing for all webpages:
@@ -54,6 +53,10 @@ const router = createBrowserRouter([
       {
         path: "/timer",
         element: <TimerPage />,
+      },
+      {
+        path: "/feedback",
+        element: <FeedbackPage />,
       }
     ],
   },
