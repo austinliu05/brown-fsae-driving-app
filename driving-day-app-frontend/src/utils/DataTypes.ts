@@ -11,7 +11,6 @@ export type DataCategory = typeof CATEGORIES[keyof typeof CATEGORIES]
 // Prefixed with 'H' indicates highest
 // Prefixed with 'L' indicates lowest
 
-
 export interface ReusableChartProps{
     // Frequency in terms of seconds: i.e. 1 = 1 second, 5 = every five seconds
     verticalLabel: string,
@@ -31,7 +30,7 @@ export interface StandardChartProps{
 export interface Issue{
     id: string;
     issue_number: number;
-    driver: string;
+    drivers: string[];
     date: string;
     synopsis: string;
     subsystems: string[];
@@ -41,5 +40,16 @@ export interface Issue{
 }
 
 
+export type ResponseValue = string | string[];
+
+export interface Feedback {
+    id: string;
+    feedback_number: number;
+    driver: string;
+    date: string;
+    responses: Record<string, ResponseValue>;
+}
+
+export type QType = 'yesOther' | 'noOther' | 'text' | 'multi';
 
 

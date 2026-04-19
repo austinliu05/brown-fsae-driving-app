@@ -35,7 +35,7 @@ const ReusableChartTemplate: React.FC<ReusableChartProps> = ({
         setTimePoints(Array.from({length: globalPageSize }, (v, i) => i + startInd))        
         setReducedPoints(chartPoints.map(kvPair => kvPair[verticalLabel]))
 
-    }, [verticalLabel, pageNumber, chartPoints])
+    }, [verticalLabel, pageNumber, chartPoints, globalPageSize])
 
 
     // Configuration for the chart data
