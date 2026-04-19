@@ -58,13 +58,13 @@ const Navbar = () => {
           </Link>
         </li>
         <li>
-          <Link to="/my-account" className="navbar-link">
-            My Account
+          <Link to="/packing-list" className="navbar-link">
+            Packing Lists
           </Link>
         </li>
         <li>
-          <Link to="/packing-list" className="navbar-link">
-            Packing Lists
+          <Link to="/my-account" className="navbar-link">
+            My Account
           </Link>
         </li>
       </ul>
