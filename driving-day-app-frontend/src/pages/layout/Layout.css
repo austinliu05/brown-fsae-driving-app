@@ -23,13 +23,13 @@
     }
 
     .page-content-body{
-        @apply w-full p-8 max-w-7xl mx-auto;
+        @apply w-full max-w-7xl mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8;
     }
 
     h1 {
         /* font-family: "Geist Mono", monospace;
         font-size: 48px; */
-        @apply mb-6 text-2xl font-semibold;
+        @apply mb-5 text-xl font-semibold sm:mb-6 sm:text-2xl;
     }
 
     select, input{

@@ -31,11 +31,11 @@ const Navbar = () => {
     { to: "/run-data", label: "Run Data" },
     { to: "/drivers", label: "Drivers" },
     { to: "/issues", label: "Issues" },
+    { to: "/feedback", label: "Feedback" },
     { to: "/my-account", label: "My Account" },
   ];
 
   return (
-<<<<<<< HEAD
     <div className="navbar-wrapper">
       <button
         type="button"
@@ -50,53 +50,6 @@ const Navbar = () => {
       </button>
 
       {isMenuOpen && (
-=======
-    <div className="navbar-wrapper" style={{ backgroundColor: "#786C6C" }}>
-      <div className="">
-        <Link to="/">
-          <img src={logo} alt="Logo" className="navbar-logo" />
-        </Link>
-      </div>
-      <ul className="navbar-buttons">
-        <li>
-          <Link to="/home" className="navbar-link">
-            Home
-          </Link>
-        </li>
-        <li>
-          <Link to="/upload-files" className="navbar-link">
-            Upload Files
-          </Link>
-        </li>
-        <li>
-          <Link to="/run-data" className="navbar-link">
-            Run Data
-          </Link>
-        </li>
-        <li>
-          <Link to="/drivers" className="navbar-link">
-            Drivers
-          </Link>
-        </li>
-        <li>
-          <Link to="/issues" className="navbar-link">
-            Issues
-          </Link>
-        </li>
-        <li>
-          <Link to="/feedback" className="navbar-link">
-            Feedback
-          </Link>
-        </li>
-        <li>
-          <Link to="/my-account" className="navbar-link">
-            My Account
-          </Link>
-        </li>
-      </ul>
-      {currUserId && 
-      <div className="px-4 absolute bottom-4">
->>>>>>> 40e58353685ad8bbfdb2f1be05e45807a264d422
         <button
           type="button"
           className="navbar-overlay"

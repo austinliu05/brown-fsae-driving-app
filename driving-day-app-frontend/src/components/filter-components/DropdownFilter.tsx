@@ -20,7 +20,7 @@ export default function DropdownFilter({
 } : DropdownFilterProps){
 
     return (
-        <select onChange={(event) => setFilterOption(event.target.value)} className="px-4 py-2 border border-gray-200 rounded-md bg-white min-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+        <select onChange={(event) => setFilterOption(event.target.value)} className="w-full px-4 py-2 border border-gray-200 rounded-md bg-white min-w-0 sm:min-w-[200px] sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
             <option>Filter: {filterCategory}</option>
             {allFilterOptions.map(filterName => {
                 return (

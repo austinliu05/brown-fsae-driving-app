@@ -78,7 +78,7 @@ export default function UploadComponent() {
     return (
         <>
             <div className="flex justify-center flex-col items-center">
-                <div className="grid grid-cols-2 w-full justify-center items-center">
+                <div className="grid grid-cols-1 gap-6 w-full items-start lg:grid-cols-2">
                     <div className="flex flex-col justify-center items-center">
                         <div className="w-11/12 py-4 justify-center">
                             <div className="text-center p-2">
@@ -108,8 +108,9 @@ export default function UploadComponent() {
                         </div>
                     </div>
 
-                    <div className="upload-metadata flex flex-col items-center w-full">
+                    <div className="upload-metadata flex flex-col items-stretch w-full max-w-xl mx-auto lg:items-center">
                         <input
+                            className="w-full max-w-md"
                             value={runTitle}
                             placeholder='Enter run title...'
                             onKeyDown={(event) => {
@@ -122,11 +123,11 @@ export default function UploadComponent() {
                         </input>
 
                         <DatePicker
-                            className="focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                            className="w-full max-w-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                             selected={runDate}
                             onChange={(date) => setRunDate(date)}
                         />
-                        <select onChange={(event) => setDriverId(event.target.value)}>
+                        <select className="w-full max-w-md" onChange={(event) => setDriverId(event.target.value)}>
                             {drivers && drivers.map(currentDriver => {
                                 return (
                                     <option

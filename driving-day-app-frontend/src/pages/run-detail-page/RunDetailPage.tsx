@@ -172,10 +172,10 @@ const RunDetailPage: React.FC = () => {
                 <div className="pt-16">
                     <h1>Graphs</h1>
                     <div className='flex flex-col'>
-                        <div className="flex py-2">
-                            <section className='px-4 py-2'>Columns:</section>
+                        <div className="flex flex-col gap-2 py-2 sm:flex-row sm:items-center">
+                            <section className='py-1 sm:px-4 sm:py-2'>Columns:</section>
 
-                            <select className="text-lg px-4 py-2 border border-gray-200 rounded-md text-blue-800 font-semibold text-1xl"
+                            <select className="w-full text-base px-4 py-2 border border-gray-200 rounded-md text-blue-800 font-semibold sm:w-auto sm:text-lg"
                                 onChange={(event) =>  {setVerticalLabel(event.target.value)}}
                             >
                                 {chartColumns.map((validColumn, index) => {
@@ -186,16 +186,16 @@ const RunDetailPage: React.FC = () => {
 
                             </select>
 
-                            <section className="px-4 py-2"> vs </section>
-                            <select className="text-lg px-4 py-2 border border-gray-200 rounded-md text-red-800 font-semibold text-1xl"
+                            <section className="py-1 sm:px-4 sm:py-2">vs</section>
+                            <select className="w-full text-base px-4 py-2 border border-gray-200 rounded-md text-red-800 font-semibold sm:w-auto sm:text-lg"
                                 // onChange={(event) => setHorizontalLabel(event.target.value)}
                             >
                                 <option value=""> {"Time"} </option>
                             </select>
                         </div>
-                        <div className='flex py-2'>
-                            <section className='px-4 py-2'>Chart Type:</section>
-                            <select className="text-lg px-4 py-2 border border-gray-200 rounded-md text-purple-800 font-semibold text-1xl"
+                        <div className='flex flex-col gap-2 py-2 sm:flex-row sm:items-center'>
+                            <section className='py-1 sm:px-4 sm:py-2'>Chart Type:</section>
+                            <select className="w-full text-base px-4 py-2 border border-gray-200 rounded-md text-purple-800 font-semibold sm:w-auto sm:text-lg"
                                 onChange={(event) => setCurrChartInd(Number(event.target.value))}
                             >
                                 {chartCategories.map((category, index) => {

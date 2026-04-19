@@ -12,15 +12,15 @@ const Pagination : React.FC<PaginationProps> = ({pageSize, pageNumber, pageQuant
 
     return (
         <div className='flex py-6'>
-            <div className='flex justify-center w-full'>
+            <div className='flex justify-center w-full gap-3'>
                 {(pageNumber > 1) && 
-                    <button className="page-button bg-blue-500" onClick={() => updatePageNumber(pageNumber-1)}>Prev</button>
+                    <button className="page-button min-w-[84px] bg-blue-500" onClick={() => updatePageNumber(pageNumber-1)}>Prev</button>
                 }
 
                 {/* <li>{pageNumber}</li> */}
 
                 {(pageQuantity >= pageSize) && 
-                    <button className="page-button bg-blue-500" onClick={() => updatePageNumber(pageNumber+1)}>Next</button>
+                    <button className="page-button min-w-[84px] bg-blue-500" onClick={() => updatePageNumber(pageNumber+1)}>Next</button>
                 }
 
             </div>

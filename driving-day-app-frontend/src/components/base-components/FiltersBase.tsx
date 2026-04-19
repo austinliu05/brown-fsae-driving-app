@@ -6,7 +6,7 @@ interface FiltersBaseProps{
 
 export default function FiltersBase({children} : FiltersBaseProps){
     return (
-        <div className='flex flex-col md:flex-row gap-4 mb-6'>
+        <div className='flex flex-col gap-3 mb-6 sm:gap-4 md:flex-row md:flex-wrap'>
             {children}
         </div>
     )

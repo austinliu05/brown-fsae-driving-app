@@ -136,7 +136,7 @@ export default function AddFeedbackModal({ isOpen, onClose, onSave }: AddFeedbac
 
             <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
               {currentPage === 0 && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label className="block text-sm font-medium mb-1">Driver</label>
                     <input
@@ -187,12 +187,12 @@ export default function AddFeedbackModal({ isOpen, onClose, onSave }: AddFeedbac
                 })}
               </div>
               
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex gap-2">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex w-full gap-2 sm:w-auto">
                   <button
                     type="button"
                     onClick={goPrev}
-                    className="px-4 py-2 border rounded"
+                    className="flex-1 px-4 py-2 border rounded sm:flex-none"
                     disabled={isLoading || currentPage === 0}
                   >
                     Prev
@@ -201,7 +201,7 @@ export default function AddFeedbackModal({ isOpen, onClose, onSave }: AddFeedbac
                     <button
                       type="button"
                       onClick={goNext}
-                      className="px-4 py-2 bg-gray-800 text-white rounded"
+                      className="flex-1 px-4 py-2 bg-gray-800 text-white rounded sm:flex-none"
                       disabled={isLoading}
                     >
                       Next
@@ -210,7 +210,7 @@ export default function AddFeedbackModal({ isOpen, onClose, onSave }: AddFeedbac
                     <button
                       type="button"
                       onClick={handleSubmit}
-                      className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
+                      className="flex-1 px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300 sm:flex-none"
                       disabled={isLoading}
                     >
                       {isLoading ? "Submitting..." : "Submit Feedback"}
@@ -221,7 +221,7 @@ export default function AddFeedbackModal({ isOpen, onClose, onSave }: AddFeedbac
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 border rounded"
+                  className="w-full px-4 py-2 border rounded sm:w-auto"
                   disabled={isLoading}
                 >
                   Cancel
