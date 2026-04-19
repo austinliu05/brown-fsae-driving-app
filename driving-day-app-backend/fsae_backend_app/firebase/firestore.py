@@ -548,15 +548,14 @@ def add_packing_list(data):
                 print(f"Missing or empty required field: {field}")
                 return None
 
-        new_packing_list_number = int(get_latest_packing_list_number()) + 1
-        data['packing_list_number'] = new_packing_list_number
+        data['packing_list_number'] = int(get_latest_packing_list_number()) + 1
 
         packing_list_data = {
             'name': data['name'],
             'description': data['description'],
             'items': data['items'],
             'category': data.get('category', 'Subsystems'),
-            'order': data.get('order', new_packing_list_number),
+            'order': data.get('order', data['packing_list_number']),
             'packing_list_number': data['packing_list_number'],
             'created_at': firestore.SERVER_TIMESTAMP
         }

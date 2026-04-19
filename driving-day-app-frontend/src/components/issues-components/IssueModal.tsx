@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Modal from "./Modal";
+import Modal from "../shared/Modal";
 import { updateIssue, deleteIssue } from "../../api/api";
 import { availableSubsystems, priorityLevels, statusOptions } from "../../constants/IssuesConstants";
 import { Issue } from "../../utils/DataTypes";

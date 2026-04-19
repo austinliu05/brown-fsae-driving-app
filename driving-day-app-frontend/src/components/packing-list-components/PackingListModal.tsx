@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import Modal from "../issues-components/Modal";
+import Modal from "../shared/Modal";
 import { PackingTemplate, PackingCategory } from "./PackingListTable";
 
 interface PackingListModalProps {
