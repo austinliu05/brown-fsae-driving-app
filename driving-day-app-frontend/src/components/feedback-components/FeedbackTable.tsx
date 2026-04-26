@@ -233,7 +233,7 @@ export default function FeedbackTable() {
 
                   <div className="mt-2">
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden w-full">
-                      <div className="sm:hidden space-y-2 p-3">
+                      <div className="md:hidden space-y-2 p-3">
                         {items.map((feed) => (
                           <button
                             key={feed.id}
@@ -250,7 +250,7 @@ export default function FeedbackTable() {
                         ))}
                       </div>
 
-                      <div className="hidden sm:block overflow-x-auto">
+                      <div className="hidden md:block overflow-x-auto">
                       <table className="w-full min-w-[560px] font-face table-auto">
                         <colgroup>
                           <col style={{ width: "25%" }} />
@@ -289,7 +289,7 @@ export default function FeedbackTable() {
       ) : (
         // Flat table view (existing)
         <>
-          <div className="sm:hidden space-y-3">
+          <div className="md:hidden space-y-3">
             <div className="flex justify-end">
               <button
                 onClick={() => setIsAddModalOpen(true)}
@@ -322,7 +322,7 @@ export default function FeedbackTable() {
             )}
           </div>
 
-          <div className="hidden sm:block bg-white rounded-lg border border-gray-200 overflow-hidden w-full">
+          <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden w-full">
             <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] font-face table-auto">
             <colgroup>

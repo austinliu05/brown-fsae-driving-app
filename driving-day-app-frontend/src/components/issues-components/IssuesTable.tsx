@@ -164,7 +164,7 @@ export default function IssueTable() {
           />          
       </FiltersBase>
 
-      <div className="sm:hidden space-y-3">
+      <div className="md:hidden space-y-3">
         <div className="flex justify-end">
           <button
             onClick={() => setIsAddModalOpen(true)}
@@ -225,7 +225,7 @@ export default function IssueTable() {
         )}
       </div>
 
-      <div className="hidden sm:block bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
         <table className="w-full min-w-[760px] font-face table-fixed">
           <colgroup>

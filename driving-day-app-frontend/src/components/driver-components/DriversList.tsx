@@ -27,7 +27,7 @@ const DriversList = () => {
       <div className="space-y-4">
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 xl:gap-8">
           <div className="drivers-list rounded-lg border border-gray-200 bg-white">
-            <div className="sm:hidden space-y-2 p-2">
+            <div className="md:hidden space-y-2 p-2">
               {drivers.map((driver, index) => {
                 const isSelected = selectedDriver?.driverId === driver.driverId;
 
@@ -49,7 +49,7 @@ const DriversList = () => {
               })}
             </div>
 
-            <div className="hidden sm:block overflow-x-auto">
+            <div className="hidden md:block overflow-x-auto">
             <table className="w-full min-w-[720px]">
               <thead className="bg-gray-100 border-none">
                 <tr>

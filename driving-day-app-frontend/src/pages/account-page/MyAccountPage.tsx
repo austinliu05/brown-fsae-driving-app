@@ -60,11 +60,11 @@ const MyAccountPage : React.FC = () => {
       <div className='w-full py-8'>
         <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="sm:hidden p-4 text-sm text-gray-500">
+            <div className="md:hidden p-4 text-sm text-gray-500">
               No linked issues yet.
             </div>
 
-            <div className="hidden sm:block overflow-x-auto">
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full min-w-[420px] font-face table-fixed">
                 <colgroup>
                   <col style={{ width: "18%" }} />
@@ -92,11 +92,11 @@ const MyAccountPage : React.FC = () => {
           </div>
 
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="sm:hidden p-4 text-sm text-gray-500">
+            <div className="md:hidden p-4 text-sm text-gray-500">
               No linked runs yet.
             </div>
 
-            <div className="hidden sm:block overflow-x-auto">
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full min-w-[360px] font-face table-fixed">
                 <colgroup>
                   <col style={{ width: "60%" }} />
