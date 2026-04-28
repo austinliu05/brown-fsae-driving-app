@@ -12,9 +12,10 @@ interface PreTestConfigsProps {
 const PreTestConfigs: React.FC<PreTestConfigsProps> = ({ value, onChange }) => {
   return (
     <div className="w-full max-w-md mt-10">
-      <h2 className="text-2xl font-semibold mb-2">Pre-Test Configs</h2>
+      <h2 className="text-2xl font-semibold mb-1">Pre-Test Configs</h2>
+      <p className="text-xs text-gray-400 mb-2">e.g. Track: Lot B, Conditions: dry, Driver: Tristan, Recorded by: Ethan, Setup: &lt;car specs&gt;, Testing: new brakes, absent shifting...</p>
       <textarea
-        placeholder="e.g. Track: Lot B, Conditions: dry, Driver: Tristan, Recorded by: Ethan, Setup: <car specs>, Testing: new brakes, absent shifting..."
+        placeholder="Notes..."
         value={value}
         onChange={e => onChange(e.target.value)}
         rows={3}
