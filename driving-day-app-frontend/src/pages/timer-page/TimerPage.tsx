@@ -17,6 +17,8 @@ Note: All timing is done in-browser (no backend needed)
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import PageBase from '../../components/base-components/PageBase';
+import LapTable from '../../components/timer-components/LapTable';
+import PreTestConfigs from '../../components/timer-components/PreTestConfigs';
 
 /*
 Time state machine logic (simplified): 
@@ -160,18 +162,6 @@ const TimerPage: React.FC = () => {
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
-  // Highlight best/worst laps after 2+ recorded laps (otherwise gray)
-  const minDuration = laps.length >= 2 ? Math.min(...laps.map(l => l.duration)) : null;
-  const maxDuration = laps.length >= 2 ? Math.max(...laps.map(l => l.duration)) : null;
-
-  // Returns a Tailwind text color class: green for the fastest lap, red for the slowest, gray otherwise.
-  const getLapColorClass = (lap: Lap): string => {
-    if (laps.length < 2) return 'text-gray-800';
-    if (lap.duration === minDuration) return 'text-green-600';
-    if (lap.duration === maxDuration) return 'text-red-500';
-    return 'text-gray-800';
-  };
-
   return (
     <PageBase>
       <h1>Lap Timer</h1>
@@ -247,60 +237,19 @@ const TimerPage: React.FC = () => {
           )}
         </div>
 
-        {/* Lap list (hidden until the timer starts) */}
-        {(laps.length > 0 || timerState !== 'idle') && (
-          <div className="w-full max-w-md bg-white rounded-lg border border-gray-200 overflow-hidden">
-            {/* Live current lap row (updates in real time, grayed out to distinguish from recorded laps) */}
-            {timerState !== 'idle' && (
-              <div className="flex items-center justify-between px-4 py-3 text-gray-400 border-b border-gray-100">
-                <span className="w-16 shrink-0 font-medium">Lap {laps.length + 1}</span>
-                <span className="flex-1" />
-                <span className="font-mono w-20 text-right shrink-0">{formatTime(lapElapsed)}</span>
-              </div>
-            )}
+        {/* Lap list — extracted into LapTable component */}
+        <LapTable
+          laps={laps}
+          lapElapsed={lapElapsed}
+          timerState={timerState}
+          onUpdateNotes={updateLapNotes}
+        />
 
-            {/* Recorded laps (color coded once there are 2+ laps) */}
-            {laps.map(lap => (
-              <div
-                key={lap.lapNumber}
-                className={`flex items-center px-4 py-3 gap-4 font-medium border-b border-gray-100 last:border-b-0 ${getLapColorClass(lap)}`}
-              >
-                <span className="w-16 shrink-0">Lap {lap.lapNumber}</span>
-                <span className="font-mono w-20 shrink-0">{formatTime(lap.duration)}</span>
-                <textarea
-                  placeholder="Add note..."
-                  value={lap.notes}
-                  onChange={e => updateLapNotes(lap.lapNumber, e.target.value)}
-                  rows={1}
-                  className="flex-1 text-sm text-gray-600 bg-transparent border-b border-gray-200 focus:outline-none focus:ring-0 focus:border-blue-600 placeholder-gray-300 resize-none overflow-hidden"
-                  onInput={e => {
-                    // auto-expand the textarea height as the user types more lines
-                    const el = e.currentTarget;
-                    el.style.height = 'auto';
-                    el.style.height = `${el.scrollHeight}px`;
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Pre-test configuration notes (resets with the timer so each run starts fresh)*/}
-        <div className="w-full max-w-md mt-10">
-          <h2 className="text-2xl font-semibold mb-2">Pre-Test Configs</h2>
-          <textarea
-            placeholder="e.g. Track: Lot B, Conditions: dry, Driver: Tristan, Recorded by: Ethan, Setup: <car specs>, Testing: new brakes, absent shifting..."
-            value={preTestConfigs}
-            onChange={e => setPreTestConfigs(e.target.value)}
-            rows={3}
-            className="w-full text-sm text-gray-600 bg-transparent border border-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent placeholder-gray-300 resize-none"
-            onInput={e => {
-              const el = e.currentTarget;
-              el.style.height = 'auto';
-              el.style.height = `${el.scrollHeight}px`;
-            }}
-          />
-        </div>
+        {/* Pre-test configs — extracted into PreTestConfigs component */}
+        <PreTestConfigs
+          value={preTestConfigs}
+          onChange={setPreTestConfigs}
+        />
       </div>
     </PageBase>
   );

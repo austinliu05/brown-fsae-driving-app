@@ -68,7 +68,8 @@ export default function Layout() {
         fetchCSRFToken();
         fetchDrivers();
 
-        const checkAuth = auth.onAuthStateChanged((user) => {
+        //const checkAuth = auth.onAuthStateChanged((user) => { 
+        const checkAuth = auth.onAuthStateChanged((user: import('firebase/auth').User | null) => { // COME BACK: remove + replace with comment above. Only used for local rendering without .env
             if (user) {
                 console.log("CURRENT USER: ", user.email)
                 setCurrUserId(user.email)
