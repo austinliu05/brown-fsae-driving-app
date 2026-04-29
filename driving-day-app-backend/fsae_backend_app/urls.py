@@ -9,14 +9,20 @@ urlpatterns = [
     path('add-driver/', add_driver_call, name='add-driver'),
     path('add-issue/', add_issue_call, name='add-issue'),
     path('add-driving-day/', add_driving_day_call, name='add-driving-day'),
+    path('add-feedback/', add_feedback_call, name='add-feedback'),
+    path('add-packing-list/', add_packing_list_call, name='add-packing-list'),
     
     # PUT Requests
     path('update-issue/<str:issue_id>/', update_issue_call, name='update-issue'),
     path('update-driving-day/<str:driving_day_id>/', update_driving_day_call, name='update-driving-day'),
+    path('update-packing-list/<str:packing_list_id>/', update_packing_list_call, name='update-packing-list'),
+    path('update-feedback/<str:feedback_id>/', update_feedback_call, name='update-feedback'),
 
     # DELETE Requests
     path('delete-issue/<str:issue_id>/', delete_issue_call, name='delete-issue'),
     path('delete-driving-day/<str:driving_day_id>/', delete_driving_day_call, name='delete-driving-day'),
+    path('delete-packing-list/<str:packing_list_id>/', delete_packing_list_call, name='delete-packing-list'),
+    path('delete-feedback/<str:feedback_id>/', delete_feedback_call, name='delete-feedback'),
 
     # GET Requests (indicated by NO /)
     path('all-drivers', get_all_drivers_call, name='all-drivers'),
@@ -25,7 +31,10 @@ urlpatterns = [
     path('specific-run-data', get_specific_run_data_call, name='specific-run-data'),
     path('specific-run-data-paginated', get_specific_run_data_paginated_call, name='specific-run-data-paginated'),
     path('all-issues', get_all_issues_call, name='all-issues'),
+    path('all-feedback', get_all_feedback_call, name='all-feedback'),
     path('issues-paginated', get_issues_paginated_call, name='get-issues-paginated'),
+    path('feedback-paginated', get_feedback_paginated_call, name='get-feedback-paginated'),
     path('get-csrf-token', get_csrf_token, name='get-csrf-token'),
     path('get-all-driving-days', get_all_driving_days_call, name='all-driving-days'),
+    path('all-packing-lists', get_all_packing_lists_call, name='all-packing-lists'),
 ]

@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Issue, DrivingDay, MOCK_PACKING_LISTS } from "../../utils/DataTypes";
-import { getAllIssues, updateDrivingDay, deleteDrivingDay } from "../../api/api";
+import { DrivingDay, PackingList, getDefaultPackingListIds, sortPackingListsForDisplay } from "../../utils/DataTypes";
+import { getAllPackingLists, updateDrivingDay, deleteDrivingDay } from "../../api/api";
+
+function mapPackingList(raw: any): PackingList {
+  return {
+    id: raw.id,
+    name: raw.name ?? "",
+    description: raw.description ?? "",
+    items: raw.items ?? [],
+    category: raw.category ?? "Subsystems",
+    order: raw.order ?? 0,
+  };
+}
 
 export default function UpdateDrivingDayEntry() {
   const navigate = useNavigate();
@@ -16,11 +27,8 @@ export default function UpdateDrivingDayEntry() {
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Backend issues
-  const [backendIssues, setBackendIssues] = useState<Issue[]>([]);
-
   // Packing lists
-  const availablePackingLists = MOCK_PACKING_LISTS;
+  const [availablePackingLists, setAvailablePackingLists] = useState<PackingList[]>([]);
   const [addedPackingListIds, setAddedPackingListIds] = useState<string[]>([]);
   const [expandedListIds, setExpandedListIds] = useState<Set<string>>(new Set());
   const [checkedItems, setCheckedItems] = useState<Record<string, Set<number>>>({});
@@ -28,11 +36,6 @@ export default function UpdateDrivingDayEntry() {
   // Drivers
   const [selectedDrivers, setSelectedDrivers] = useState<string[]>([]);
   const [newDriverName, setNewDriverName] = useState("");
-
-  // Issues
-  const [linkedIssueIds, setLinkedIssueIds] = useState<string[]>([]);
-  const [isIssueDropdownOpen, setIsIssueDropdownOpen] = useState(false);
-
 
   // Redirect if no driving day data was passed
   useEffect(() => {
@@ -58,36 +61,44 @@ export default function UpdateDrivingDayEntry() {
     });
     setCheckedItems(checked);
   }, [drivingDay, navigate]);
-
-  // Fetch issues from backend on mount and pre-populate linked issues
+  
   useEffect(() => {
-    const fetchIssues = async () => {
+    const fetchPackingLists = async () => {
       try {
-        const response = await getAllIssues();
-        if (response.data?.issues) {
-          const issues: Issue[] = response.data.issues;
-          setBackendIssues(issues);
-
-          // drivingDay.issueIds contains issue_numbers (from backend),
-          // so convert them to document IDs for the linked issues state
-          if (drivingDay) {
-            const issueDocIds = drivingDay.issueIds
-              .map((numOrId) => {
-                const match = issues.find(
-                  (i) => String(i.issue_number) === String(numOrId) || i.id === numOrId
-                );
-                return match?.id;
-              })
-              .filter((id): id is string => !!id);
-            setLinkedIssueIds(issueDocIds);
-          }
+        const response = await getAllPackingLists();
+        if (response.data?.packing_lists) {
+          setAvailablePackingLists(sortPackingListsForDisplay(response.data.packing_lists.map(mapPackingList)));
         }
       } catch (err) {
-        console.error("Failed to fetch issues:", err);
+        console.error("Failed to fetch packing lists:", err);
       }
     };
-    fetchIssues();
-  }, [drivingDay]);
+
+    fetchPackingLists();
+  }, []);
+
+  useEffect(() => {
+    if (availablePackingLists.length === 0) return;
+
+    const defaultPackingListIds = getDefaultPackingListIds(availablePackingLists);
+    if (defaultPackingListIds.length === 0) return;
+
+    setAddedPackingListIds((prev) => Array.from(new Set([...prev, ...defaultPackingListIds])));
+    setExpandedListIds((prev) => {
+      const next = new Set(prev);
+      defaultPackingListIds.forEach((listId) => next.add(listId));
+      return next;
+    });
+    setCheckedItems((prev) => {
+      const next = { ...prev };
+      defaultPackingListIds.forEach((listId) => {
+        if (!next[listId]) {
+          next[listId] = new Set<number>();
+        }
+      });
+      return next;
+    });
+  }, [availablePackingLists]);
 
   // ── Packing list handlers ─────
 
@@ -133,16 +144,6 @@ export default function UpdateDrivingDayEntry() {
     setNewDriverName("");
   };
 
-  const toggleIssue = (issueId: string) => {
-    setLinkedIssueIds((prev) =>
-      prev.includes(issueId) ? prev.filter((id) => id !== issueId) : [...prev, issueId]
-    );
-  };
-
-  const allIssues = [...backendIssues].sort(
-    (a, b) => b.issue_number - a.issue_number
-  );
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!drivingDay) return;
@@ -161,10 +162,6 @@ export default function UpdateDrivingDayEntry() {
         description,
         drivers: selectedDrivers,
         packingLists: packingListEntries,
-        issues: linkedIssueIds.map((id) => {
-          const issue = allIssues.find((i) => i.id === id);
-          return issue?.issue_number ?? 0;
-        }),
         feedback: [],
       });
 
@@ -454,114 +451,6 @@ export default function UpdateDrivingDayEntry() {
             );
           })}
         </div>
-      </div>
-
-      {/* ── Associated Issues ── */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Associated Issues</h2>
-        </div>
-
-        <div className="relative mb-3">
-          <button
-            type="button"
-            onClick={() => setIsIssueDropdownOpen(!isIssueDropdownOpen)}
-            className="w-full border rounded p-2 text-left flex justify-between items-center"
-          >
-            <span>
-              {linkedIssueIds.length > 0
-                ? `Linked (${linkedIssueIds.length})`
-                : "Link existing issues"}
-            </span>
-            <span>{isIssueDropdownOpen ? "▲" : "▼"}</span>
-          </button>
-          {isIssueDropdownOpen && (
-            <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow-lg max-h-60 overflow-y-auto">
-              {allIssues.map((issue) => (
-                <div
-                  key={issue.id}
-                  className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
-                  onClick={() => toggleIssue(issue.id)}
-                >
-                  <input
-                    type="checkbox"
-                    checked={linkedIssueIds.includes(issue.id)}
-                    onChange={() => {}}
-                    className="mr-2"
-                  />
-                  <span className="font-medium mr-2">#{issue.issue_number}</span>
-                  <span className="text-gray-600 truncate">{issue.synopsis}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {linkedIssueIds.length > 0 && (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mt-3">
-            <table className="w-full font-face table-fixed">
-              <colgroup>
-                <col style={{ width: "10%" }} />
-                <col style={{ width: "30%" }} />
-                <col style={{ width: "20%" }} />
-                <col style={{ width: "15%" }} />
-                <col style={{ width: "15%" }} />
-                <col style={{ width: "10%" }} />
-              </colgroup>
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="px-4 py-3 text-left font-medium">#</th>
-                  <th className="px-4 py-3 text-left font-medium">Synopsis</th>
-                  <th className="px-4 py-3 text-left font-medium hidden sm:table-cell">Subsystems</th>
-                  <th className="px-4 py-3 text-left font-medium">Priority</th>
-                  <th className="px-4 py-3 text-left font-medium">Status</th>
-                  <th className="px-4 py-3 text-left font-medium"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {linkedIssueIds.map((id) => {
-                  const issue = allIssues.find((i) => i.id === id);
-                  if (!issue) return null;
-                  return (
-                    <tr
-                      key={issue.id}
-                      className="odd:bg-white even:bg-blue-50 border-b border-gray-100"
-                    >
-                      <td className="px-4 py-3 font-medium">{issue.issue_number}</td>
-                      <td className="px-4 py-3 break-words">{issue.synopsis}</td>
-                      <td className="hidden sm:table-cell px-4 py-3">
-                        <div className="flex flex-wrap gap-1">
-                          {issue.subsystems.map((s) => (
-                            <span key={s} className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">{s}</span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded ${getPriorityColor(issue.priority)}`}>
-                          {issue.priority}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded ${getStatusColor(issue.status)}`}>
-                          {issue.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <button
-                          type="button"
-                          onClick={() => toggleIssue(issue.id)}
-                          className="text-red-500 hover:text-red-700 text-sm"
-                        >
-                          ×
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
 
       <div className="flex justify-between">

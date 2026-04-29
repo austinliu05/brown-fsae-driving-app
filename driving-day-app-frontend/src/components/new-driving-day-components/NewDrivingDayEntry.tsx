@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GENERAL_PACKING_LIST_ID, Issue, MOCK_PACKING_LISTS } from "../../utils/DataTypes";
-import { getAllIssues, postDrivingDay } from "../../api/api";
+import { PackingList, getDefaultPackingListIds, sortPackingListsForDisplay } from "../../utils/DataTypes";
+import { getAllPackingLists, postDrivingDay } from "../../api/api";
+
+function mapPackingList(raw: any): PackingList {
+  return {
+    id: raw.id,
+    name: raw.name ?? "",
+    description: raw.description ?? "",
+    items: raw.items ?? [],
+    category: raw.category ?? "Subsystems",
+    order: raw.order ?? 0,
+  };
+}
 
 export default function NewDrivingDayEntry() {
   const navigate = useNavigate();
@@ -14,24 +25,15 @@ export default function NewDrivingDayEntry() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Backend issues
-  const [backendIssues, setBackendIssues] = useState<Issue[]>([]);
-
   // Packing lists 
-  const availablePackingLists = MOCK_PACKING_LISTS;
-  const [addedPackingListIds, setAddedPackingListIds] = useState<string[]>(
-    GENERAL_PACKING_LIST_ID ? [GENERAL_PACKING_LIST_ID] : []
-  );
+  const [availablePackingLists, setAvailablePackingLists] = useState<PackingList[]>([]);
+  const [addedPackingListIds, setAddedPackingListIds] = useState<string[]>([]);
 
   // Track which accordions are expanded (by packing list id)
-  const [expandedListIds, setExpandedListIds] = useState<Set<string>>(
-    new Set(GENERAL_PACKING_LIST_ID ? [GENERAL_PACKING_LIST_ID] : [])
-  );
+  const [expandedListIds, setExpandedListIds] = useState<Set<string>>(new Set());
 
   // Track checked items per packing list: { listId: Set<itemIndex> }
-  const [checkedItems, setCheckedItems] = useState<Record<string, Set<number>>>(
-    GENERAL_PACKING_LIST_ID ? { [GENERAL_PACKING_LIST_ID]: new Set<number>() } : {}
-  );
+  const [checkedItems, setCheckedItems] = useState<Record<string, Set<number>>>({});
 
   const handleAddPackingList = (listId: string) => {
     if (!listId || addedPackingListIds.includes(listId)) return;
@@ -66,25 +68,43 @@ export default function NewDrivingDayEntry() {
   const [selectedDrivers, setSelectedDrivers] = useState<string[]>([]);
   const [newDriverName, setNewDriverName] = useState("");
 
-  // Issues
-  const [linkedIssueIds, setLinkedIssueIds] = useState<string[]>([]);
-  const [isIssueDropdownOpen, setIsIssueDropdownOpen] = useState(false);
-
-
-  // Fetch issues from backend on mount
   useEffect(() => {
-    const fetchIssues = async () => {
+    const fetchPackingLists = async () => {
       try {
-        const response = await getAllIssues();
-        if (response.data?.issues) {
-          setBackendIssues(response.data.issues);
+        const response = await getAllPackingLists();
+        if (response.data?.packing_lists) {
+          setAvailablePackingLists(sortPackingListsForDisplay(response.data.packing_lists.map(mapPackingList)));
         }
       } catch (err) {
-        console.error("Failed to fetch issues:", err);
+        console.error("Failed to fetch packing lists:", err);
       }
     };
-    fetchIssues();
+
+    fetchPackingLists();
   }, []);
+
+  useEffect(() => {
+    if (availablePackingLists.length === 0) return;
+
+    const defaultPackingListIds = getDefaultPackingListIds(availablePackingLists);
+    if (defaultPackingListIds.length === 0) return;
+
+    setAddedPackingListIds((prev) => Array.from(new Set([...prev, ...defaultPackingListIds])));
+    setExpandedListIds((prev) => {
+      const next = new Set(prev);
+      defaultPackingListIds.forEach((listId) => next.add(listId));
+      return next;
+    });
+    setCheckedItems((prev) => {
+      const next = { ...prev };
+      defaultPackingListIds.forEach((listId) => {
+        if (!next[listId]) {
+          next[listId] = new Set<number>();
+        }
+      });
+      return next;
+    });
+  }, [availablePackingLists]);
 
   // ── Handlers ─────
 
@@ -98,17 +118,6 @@ export default function NewDrivingDayEntry() {
     setSelectedDrivers((prev) => [...prev, name]);
     setNewDriverName("");
   };
-
-  const toggleIssue = (issueId: string) => {
-    setLinkedIssueIds((prev) =>
-      prev.includes(issueId) ? prev.filter((id) => id !== issueId) : [...prev, issueId]
-    );
-  };
-
-  // Combine backend issues for lookups
-  const allIssues = [...backendIssues].sort(
-    (a, b) => b.issue_number - a.issue_number
-  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,10 +136,6 @@ export default function NewDrivingDayEntry() {
         description,
         drivers: selectedDrivers,
         packingLists: packingListEntries,
-        issues: linkedIssueIds.map((id) => {
-          const issue = allIssues.find((i) => i.id === id);
-          return issue?.issue_number ?? 0;
-        }),
         feedback: [],
       });
 
@@ -375,116 +380,6 @@ export default function NewDrivingDayEntry() {
             );
           })}
         </div>
-      </div>
-
-      {/* ── Associated Issues */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Associated Issues</h2>
-        </div>
-
-        {/* Dropdown selector */}
-        <div className="relative mb-3">
-          <button
-            type="button"
-            onClick={() => setIsIssueDropdownOpen(!isIssueDropdownOpen)}
-            className="w-full border rounded p-2 text-left flex justify-between items-center"
-          >
-            <span>
-              {linkedIssueIds.length > 0
-                ? `Linked (${linkedIssueIds.length})`
-                : "Link existing issues"}
-            </span>
-            <span>{isIssueDropdownOpen ? "▲" : "▼"}</span>
-          </button>
-          {isIssueDropdownOpen && (
-            <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow-lg max-h-60 overflow-y-auto">
-              {allIssues.map((issue) => (
-                <div
-                  key={issue.id}
-                  className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
-                  onClick={() => toggleIssue(issue.id)}
-                >
-                  <input
-                    type="checkbox"
-                    checked={linkedIssueIds.includes(issue.id)}
-                    onChange={() => {}}
-                    className="mr-2"
-                  />
-                  <span className="font-medium mr-2">#{issue.issue_number}</span>
-                  <span className="text-gray-600 truncate">{issue.synopsis}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Linked issues table */}
-        {linkedIssueIds.length > 0 && (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mt-3">
-            <table className="w-full font-face table-fixed">
-              <colgroup>
-                <col style={{ width: "10%" }} />
-                <col style={{ width: "30%" }} />
-                <col style={{ width: "20%" }} />
-                <col style={{ width: "15%" }} />
-                <col style={{ width: "15%" }} />
-                <col style={{ width: "10%" }} />
-              </colgroup>
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="px-4 py-3 text-left font-medium">#</th>
-                  <th className="px-4 py-3 text-left font-medium">Synopsis</th>
-                  <th className="px-4 py-3 text-left font-medium hidden sm:table-cell">Subsystems</th>
-                  <th className="px-4 py-3 text-left font-medium">Priority</th>
-                  <th className="px-4 py-3 text-left font-medium">Status</th>
-                  <th className="px-4 py-3 text-left font-medium"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {linkedIssueIds.map((id) => {
-                  const issue = allIssues.find((i) => i.id === id);
-                  if (!issue) return null;
-                  return (
-                    <tr
-                      key={issue.id}
-                      className="odd:bg-white even:bg-blue-50 border-b border-gray-100"
-                    >
-                      <td className="px-4 py-3 font-medium">{issue.issue_number}</td>
-                      <td className="px-4 py-3 break-words">{issue.synopsis}</td>
-                      <td className="hidden sm:table-cell px-4 py-3">
-                        <div className="flex flex-wrap gap-1">
-                          {issue.subsystems.map((s) => (
-                            <span key={s} className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">{s}</span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded ${getPriorityColor(issue.priority)}`}>
-                          {issue.priority}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded ${getStatusColor(issue.status)}`}>
-                          {issue.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <button
-                          type="button"
-                          onClick={() => toggleIssue(issue.id)}
-                          className="text-red-500 hover:text-red-700 text-sm"
-                        >
-                          ×
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
 
       <div className="flex justify-end gap-3">

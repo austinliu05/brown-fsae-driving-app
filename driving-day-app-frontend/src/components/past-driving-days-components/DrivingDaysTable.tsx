@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DrivingDay, PackingListEntry, MOCK_PACKING_LISTS } from "../../utils/DataTypes";
-import { getAllDrivingDays } from "../../api/api";
+import { DrivingDay, PackingList, PackingListEntry } from "../../utils/DataTypes";
+import { getAllDrivingDays, getAllPackingLists } from "../../api/api";
+
+function mapPackingList(raw: any): PackingList {
+  return {
+    id: raw.id,
+    name: raw.name ?? "",
+    description: raw.description ?? "",
+    items: raw.items ?? [],
+    category: raw.category ?? "Subsystems",
+    order: raw.order ?? 0,
+  };
+}
 
 function mapDrivingDay(raw: any): DrivingDay {
   return {
@@ -15,7 +26,6 @@ function mapDrivingDay(raw: any): DrivingDay {
       packingListId: pl.packingListId ?? pl.packing_list_id ?? "",
       checkedItems: pl.checkedItems ?? pl.checked_items ?? [],
     })),
-    issueIds: raw.issue_ids ?? [],
     feedback: raw.feedback ?? [],
   };
 }
@@ -23,6 +33,7 @@ function mapDrivingDay(raw: any): DrivingDay {
 export default function DrivingDaysTable() {
   const navigate = useNavigate();
   const [drivingDays, setDrivingDays] = useState<DrivingDay[]>([]);
+  const [packingLists, setPackingLists] = useState<PackingList[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -38,7 +49,20 @@ export default function DrivingDaysTable() {
         setIsLoading(false);
       }
     };
+
+    const fetchPackingLists = async () => {
+      try {
+        const response = await getAllPackingLists();
+        if (response.data?.packing_lists) {
+          setPackingLists(response.data.packing_lists.map(mapPackingList));
+        }
+      } catch (error) {
+        console.error("Failed to fetch packing lists:", error);
+      }
+    };
+
     fetchDrivingDays();
+    fetchPackingLists();
   }, []);
 
   return (
@@ -50,8 +74,7 @@ export default function DrivingDaysTable() {
             <col style={{ width: "22%" }} />
             <col style={{ width: "12%" }} />
             <col style={{ width: "22%" }} />
-            <col style={{ width: "22%" }} />
-            <col style={{ width: "14%" }} />
+            <col style={{ width: "36%" }} />
           </colgroup>
           <thead>
             <tr className="border-b border-gray-100">
@@ -59,10 +82,9 @@ export default function DrivingDaysTable() {
               <th className="px-6 py-4 text-left font-medium">Title</th>
               <th className="px-6 py-4 text-left font-medium">Date</th>
               <th className="px-6 py-4 text-left font-medium hidden sm:table-cell">Drivers</th>
-              <th className="px-6 py-4 text-left font-medium hidden md:table-cell">Packing Lists</th>
               <th className="px-6 py-4 text-left font-medium">
                 <div className="flex items-center justify-between">
-                  <span className="hidden sm:inline">Issues</span>
+                  <span className="hidden sm:inline">Packing Lists</span>
                   <button
                     onClick={() => navigate("/new-driving-day")}
                     className="ml-4 bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 focus:outline-none"
@@ -112,7 +134,7 @@ export default function DrivingDaysTable() {
                 <td className="hidden md:table-cell px-6 py-4 sm:py-3">
                   <div className="flex flex-wrap gap-1">
                     {day.packingLists.map((entry) => {
-                      const pl = MOCK_PACKING_LISTS.find((p) => p.id === entry.packingListId);
+                      const pl = packingLists.find((p) => p.id === entry.packingListId);
                       const totalItems = pl?.items.length ?? 0;
                       const checkedCount = entry.checkedItems.length;
                       return (
@@ -125,15 +147,6 @@ export default function DrivingDaysTable() {
                       );
                     })}
                   </div>
-                </td>
-                <td className="px-6 py-4 sm:py-3 text-gray-600">
-                  {day.issueIds.length > 0 ? (
-                    <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded">
-                      {day.issueIds.length}
-                    </span>
-                  ) : (
-                    <span className="text-xs text-gray-400">—</span>
-                  )}
                 </td>
               </tr>
             ))}

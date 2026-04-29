@@ -84,6 +84,7 @@ CSRF_COOKIE_SAMESITE = 'None'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
     "https://brown-fsae.vercel.app",
     "https://brown-fsae-austinliu05-austinliu05s-projects.vercel.app",
 ]
@@ -98,6 +99,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
     "https://brown-fsae.vercel.app",
     "https://brown-fsae-austinliu05-austinliu05s-projects.vercel.app",
 ]

@@ -11,7 +11,6 @@ export type DataCategory = typeof CATEGORIES[keyof typeof CATEGORIES]
 // Prefixed with 'H' indicates highest
 // Prefixed with 'L' indicates lowest
 
-
 export interface ReusableChartProps{
     // Frequency in terms of seconds: i.e. 1 = 1 second, 5 = every five seconds
     verticalLabel: string,
@@ -31,7 +30,7 @@ export interface StandardChartProps{
 export interface Issue{
     id: string;
     issue_number: number;
-    driver: string;
+    drivers: string[];
     date: string;
     synopsis: string;
     subsystems: string[];
@@ -45,7 +44,11 @@ export interface PackingList {
     name: string;
     description: string;
     items: string[];
+    category?: PackingCategory;
+    order?: number;
 }
+
+export type PackingCategory = "Standard" | "Subsystems";
 
 export interface PackingListEntry {
     packingListId: string;
@@ -60,48 +63,44 @@ export interface DrivingDay {
     description: string;
   drivers: string[];
     packingLists: PackingListEntry[];
-    issueIds: string[];
     feedback: string[];
 }
 
-export const MOCK_PACKING_LISTS: PackingList[] = [
-  {
-    id: "pl1",
-    name: "Standard Track Day",
-    description: "Everything needed for a full day at the track",
-    items: [
-      "Fire extinguisher",
-      "First aid kit",
-      "Tool chest",
-      "Tire warmers",
-      "Spare tire set",
-      "Fuel jugs (x2)",
-      "Helmet(s)",
-      "Driver suits",
-      "Data logging laptop",
-      "Pop-up tent",
-      "Folding table & chairs",
-      "Battery charger",
-      "Jack & jack stands",
-      "Rain canopy",
-    ],
-  },
-  {
-    id: "pl2",
-    name: "Minimal Shakedown",
-    description: "Bare essentials for a quick shakedown run",
-    items: [
-      "Fire extinguisher",
-      "First aid kit",
-      "Helmet(s)",
-      "Driver suits",
-      "Tool chest",
-      "Battery charger",
-    ],
-  },
-];
+export const isStandardPackingList = (packingList: PackingList) =>
+    (packingList.category ?? "").trim().toLowerCase() === "standard" ||
+    packingList.name.trim().toLowerCase() === "general";
 
-export const GENERAL_PACKING_LIST_ID = MOCK_PACKING_LISTS[0]?.id ?? "";
+export const getDefaultPackingListIds = (packingLists: PackingList[]) =>
+    packingLists.filter(isStandardPackingList).map((packingList) => packingList.id);
 
+export const sortPackingListsForDisplay = (packingLists: PackingList[]) =>
+    [...packingLists].sort((left, right) => {
+        const leftIsStandard = isStandardPackingList(left);
+        const rightIsStandard = isStandardPackingList(right);
+
+        if (leftIsStandard !== rightIsStandard) {
+            return leftIsStandard ? -1 : 1;
+        }
+
+        const leftOrder = left.order ?? Number.MAX_SAFE_INTEGER;
+        const rightOrder = right.order ?? Number.MAX_SAFE_INTEGER;
+        if (leftOrder !== rightOrder) {
+            return leftOrder - rightOrder;
+        }
+
+        return left.name.localeCompare(right.name);
+    });
+
+export type ResponseValue = string | string[];
+
+export interface Feedback {
+    id: string;
+    feedback_number: number;
+    driver: string;
+    date: string;
+    responses: Record<string, ResponseValue>;
+}
+
+export type QType = 'yesOther' | 'noOther' | 'text' | 'multi';
 
 

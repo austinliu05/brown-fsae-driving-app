@@ -1,8 +1,7 @@
-import axios, { Axios } from "axios";
+import axios from "axios";
 import { AxiosError } from "axios";
-import { DataCategory } from "../utils/DataTypes";
-import { PackingListEntry } from "../utils/DataTypes";
 import exp from "constants";
+import { DataCategory, ResponseValue, PackingListEntry  } from "../utils/DataTypes";
 
 export const api = axios.create({
   baseURL: `${process.env.REACT_APP_BACKEND_URL}/api/`,
@@ -80,7 +79,7 @@ export const postS3Image = async (formData: FormData, id: string) => {
 };
 
 export const postIssue = async (issueData: {
-  driver: string;
+  drivers: string[];
   date: string;
   synopsis: string;
   subsystems: string[];
@@ -96,12 +95,32 @@ export const postDrivingDay = async (drivingDayData: {
   description: string;
   drivers: string[];
   packingLists: PackingListEntry[];
-  issues: number[];
   feedback: number[];
 }) => {
   const path = "add-driving-day/";
   return await postRequest(path, drivingDayData);
 };
+
+export const postPackingList = async (listData: {
+  name: string;
+  description: string;
+  items: string[];
+  category: string;
+  order?: number;
+}) => {
+  const path = "add-packing-list/";
+  return await postRequest(path, listData);
+};
+
+export const postFeedback = async (feedbackData: {
+  driver: string;
+  date: string;
+  responses: Record<string, ResponseValue>;
+}) => {
+  const path = "add-feedback/";
+  return await postRequest(path, feedbackData);
+};
+
 
 /**
  *
@@ -281,11 +300,32 @@ export const getIssuesPaginated = async (filters: {
   return await getRequest(path, params);
 };
 
+export const getAllFeedback = async () => {
+  const path = "all-feedback";
+  return await getRequest(path, new URLSearchParams());
+}
+
+export const getFeedbackPaginated = async (filters: {
+  pageSize: number,
+  startAtDoc: string,
+  startAfterDoc: string
+}) => {
+  const path = "feedback-paginated"
+
+  const params = new URLSearchParams({
+    pageSize: filters.pageSize.toString(),
+    startAtDoc: filters.startAtDoc,
+    startAfterDoc: filters.startAfterDoc
+  });
+
+  return await getRequest(path, params);
+};
+
 
 export const updateIssue = async (
   issueId: string,
   issueData: {
-    driver?: string;
+    driver?: string[];
     date?: string;
     synopsis?: string;
     subsystems?: string[];
@@ -313,7 +353,6 @@ export const updateDrivingDay = async (
     description?: string;
     drivers?: string[];
     packingLists?: PackingListEntry[];
-    issues?: number[];
     feedback?: number[];
   }
 ) => {
@@ -342,6 +381,74 @@ export const deleteIssue = async (issueId: string) => {
 
 export const deleteDrivingDay = async (drivingDayId: string) => {
   const path = `delete-driving-day/${drivingDayId}/`;
+  return await getRequest(path, new URLSearchParams());
+};
+
+export const getAllPackingLists = async () => {
+  const path = "all-packing-lists";
+  return await getRequest(path, new URLSearchParams());
+};
+
+export const getPackingList = async (listId: string) => {
+  const path = "packing-list";
+  const params = new URLSearchParams({ listId });
+  return await getRequest(path, params);
+};
+
+export const updatePackingList = async (
+  listId: string,
+  listData: {
+    name?: string;
+    description?: string;
+    items?: string[];
+    category?: string;
+    order?: number;
+  }
+) => {
+  const path = `update-packing-list/${listId}/`;
+  try {
+    const response = await api.put(path, listData);
+    return response;
+  } catch (error) {
+    console.error(error);
+    const axiosError = error as AxiosError;
+    return { status: axiosError.status };
+  }
+};
+
+export const updateFeedback = async (
+  feedbackId: string,
+  feedbackData: {
+    driver?: string;
+    date?: string;
+    responses?: Record<string, ResponseValue>;
+  }
+) => {
+  const path = `update-feedback/${feedbackId}/`;
+  try {
+    const response = await api.put(path, feedbackData);
+    return response;
+  } catch (error) {
+    console.error(error);
+    const axiosError = error as AxiosError;
+    return { status: axiosError.status };
+  }
+};
+
+export const deletePackingList = async (listId: string) => {
+  const path = `delete-packing-list/${listId}/`;
+  try {
+    const response = await api.delete(path);
+    return response;
+  } catch (error) {
+    console.error(error);
+    const axiosError = error as AxiosError;
+    return { status: axiosError.status };
+  }
+};
+
+export const deleteFeedback = async (feedbackId: string) => {
+  const path = `delete-feedback/${feedbackId}/`;
   try {
     const response = await api.delete(path);
     return response;
