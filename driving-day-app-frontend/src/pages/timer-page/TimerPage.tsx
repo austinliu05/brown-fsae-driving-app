@@ -96,6 +96,12 @@ const TimerPage: React.FC = () => {
     setTimerState('stopped');
   };
 
+  // Saves the completed run then wipes back to zero.
+  // TODO: call postRun({ date: runDate, runName, preTestConfigs, laps }) before handleReset() when backend is ready
+  const handleSave = () => {
+    handleReset();
+  };
+
   // Wipes back to zero (timer, laps, and the run metadata fields)
   const handleReset = () => {
     cancelAnimationFrame(rafRef.current);
@@ -230,6 +236,21 @@ const TimerPage: React.FC = () => {
             </button>
           )}
         </div>
+
+        {/* Save button — only shown when the timer is stopped */}
+        {timerState === 'stopped' && (
+          <button
+            onClick={handleSave}
+            disabled={!runDate || !runName}
+            className={`w-full max-w-md mb-6 py-2 rounded-md text-sm font-medium transition-colors ${
+              !runDate || !runName
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'  // disabled until date and run name are filled in
+                : 'bg-blue-600 text-white hover:bg-blue-500'
+            }`}
+          >
+            Save Run
+          </button>
+        )}
 
         {/* Lap list — extracted into LapTable component */}
         <LapTable
