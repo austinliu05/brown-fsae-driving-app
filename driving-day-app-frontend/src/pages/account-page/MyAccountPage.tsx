@@ -36,15 +36,12 @@ const MyAccountPage : React.FC = () => {
   }, [currUserId])
 
   return (
-    <PageBase style={{
-      height: '100vh',
-      overflow: 'hidden'
-    }}>
+    <PageBase>
       <h1>My Account</h1>
       {currUserId 
         ? <SpecificDriverProfile driver={currUser}/>
         : (
-            <div className="flex flex-col items-center justify-center h-full">
+            <div className="flex flex-col items-center justify-center min-h-[40vh]">
               <button
                 onClick={performLogin}
                 className="flex px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg shadow hover:bg-gray-50 flex items-center justify-center gap-2 mx-auto"
@@ -60,67 +57,65 @@ const MyAccountPage : React.FC = () => {
         )
       }
 
-      <div className='flex flex-col items-center justify-center w-full py-8'>
-        <div className='grid grid-cols-2 w-full'>
-          {/** Section for issues linked to drive */}
+      <div className='w-full py-8'>
+        <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="md:hidden p-4 text-sm text-gray-500">
+              No linked issues yet.
+            </div>
 
-          <div className="flex items-center justify-center w-full">
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <table className="w-full font-face table-fixed">
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full min-w-[420px] font-face table-fixed">
                 <colgroup>
-                  {/** Issue # */}
-                  <col style={{ width: "10%" }} />
-                  {/** Date */}
-                  <col style={{ width: "10%" }} /> 
-                  {/** Synopsis */}
-                  <col style={{ width: "15%" }} /> 
-                  {/** Subsystem */}
-                  <col style={{ width: "10%" }} /> 
+                  <col style={{ width: "18%" }} />
+                  <col style={{ width: "20%" }} />
+                  <col style={{ width: "42%" }} />
+                  <col style={{ width: "20%" }} />
                 </colgroup>
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="px-4 py-3 text-left font-medium text-base sm:px-6 sm:py-4 sm:text-lg">Issue #</th>
+                    <th className="px-4 py-3 text-left font-medium sm:px-6 sm:py-4">Date</th>
+                    <th className="px-4 py-3 text-left font-medium sm:px-6 sm:py-4">Synop.</th>
+                    <th className="px-4 py-3 text-left font-medium sm:px-6 sm:py-4">Subsys.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colSpan={4} className="px-4 py-6 text-sm text-gray-500 sm:px-6">
+                      No linked issues yet.
+                    </td>
+                  </tr>
+                </tbody>
               </table>
-              <thead>
-              <tr className="border-b border-gray-100">
-                <th className="px-6 py-4 text-left font-medium text-lg">
-                  Issue #
-                </th>
-                <th className="px-6 py-4 text-left font-medium">Date</th>
-                <th className="px-6 py-4 text-left font-medium">Synop.</th>
-                <th className="px-6 py-4 text-left font-medium">Subsys.</th>
-              </tr>
-            </thead>
             </div>
           </div>
 
-          {/** Section for linked runs */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="md:hidden p-4 text-sm text-gray-500">
+              No linked runs yet.
+            </div>
 
-          <div className="flex items-center justify-center w-full">
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <table className="w-full font-face table-fixed">
-                  <colgroup>
-                    {/** Issue # */}
-                    <col style={{ width: "50%" }} />
-                    {/** Driver */}
-                    {/* <col style={{ width: "10%" }} />  */}
-                    {/** Date */}
-                    <col style={{ width: "50%" }} /> 
-                    {/** Synopsis */}
-                    {/* <col style={{ width: "15%" }} />  */}
-                    {/** Subsystem */}
-                    {/* <col style={{ width: "10%" }} />  */}
-                    {/** Priority */}
-                    {/* <col style={{ width: "8%" }} />  */}
-                    {/** Status */}
-                    {/* <col style={{ width: "15%" }} />  */}
-                  </colgroup>
-                </table>
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full min-w-[360px] font-face table-fixed">
+                <colgroup>
+                  <col style={{ width: "60%" }} />
+                  <col style={{ width: "40%" }} />
+                </colgroup>
                 <thead>
                   <tr className="border-b border-gray-100">
-                    <th className="px-6 py-4 text-left font-medium text-lg">
-                      Run Title
-                    </th>
-                    <th className="px-6 py-4 text-left font-medium">Date</th>
+                    <th className="px-4 py-3 text-left font-medium text-base sm:px-6 sm:py-4 sm:text-lg">Run Title</th>
+                    <th className="px-4 py-3 text-left font-medium sm:px-6 sm:py-4">Date</th>
                   </tr>
                 </thead>
+                <tbody>
+                  <tr>
+                    <td colSpan={2} className="px-4 py-6 text-sm text-gray-500 sm:px-6">
+                      No linked runs yet.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

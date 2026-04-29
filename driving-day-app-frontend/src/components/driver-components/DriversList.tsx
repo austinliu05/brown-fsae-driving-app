@@ -25,15 +25,38 @@ const DriversList = () => {
       </div>
 
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-8">
-          <div className="drivers-list">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 xl:gap-8">
+          <div className="drivers-list rounded-lg border border-gray-200 bg-white">
+            <div className="md:hidden space-y-2 p-2">
+              {drivers.map((driver, index) => {
+                const isSelected = selectedDriver?.driverId === driver.driverId;
+
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setSelectedDriver(driver)}
+                    className={`w-full text-left rounded-md border p-3 ${
+                      isSelected ? "border-blue-500 bg-blue-50" : "border-gray-200 bg-white"
+                    }`}
+                  >
+                    <p className="font-semibold text-gray-900">{driver.firstName} {driver.lastName}</p>
+                    <p className="mt-1 text-xs text-gray-600">Height: {driver.height} cm</p>
+                    <p className="mt-1 text-xs text-gray-600">Weight: {driver.weight} kg</p>
+                    <p className="mt-1 text-xs text-gray-600">Pedal Box: {driver.pedalBoxPos}</p>
+                  </button>
+                )
+              })}
+            </div>
+
+            <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-100 border-none">
                 <tr>
-                  <th className="border p-4 text-left">Name</th>
-                  <th className="border p-4 text-left">Height (cm)</th>
-                  <th className="border p-4 text-left">Weight (kg)</th>
-                  <th className="border p-4 text-left">Pedal Box Position</th>
+                  <th className="border p-3 text-left sm:p-4">Name</th>
+                  <th className="border p-3 text-left sm:p-4">Height (cm)</th>
+                  <th className="border p-3 text-left sm:p-4">Weight (kg)</th>
+                  <th className="border p-3 text-left sm:p-4">Pedal Box Position</th>
                 </tr>
               </thead>
               <tbody>
@@ -43,16 +66,17 @@ const DriversList = () => {
                     onClick={() => setSelectedDriver(driver)}
                     className="hover:bg-gray-50 cursor-pointer transition-colors"
                   >
-                    <td className="border p-4 text-[#24a0ed]">
+                    <td className="border p-3 text-[#24a0ed] sm:p-4">
                       {`${driver.firstName} ${driver.lastName}`}
                     </td>
-                    <td className="border p-4">{driver.height}</td>
-                    <td className="border p-4">{driver.weight}</td>
-                    <td className="border p-4">{driver.pedalBoxPos}</td>
+                    <td className="border p-3 sm:p-4">{driver.height}</td>
+                    <td className="border p-3 sm:p-4">{driver.weight}</td>
+                    <td className="border p-3 sm:p-4">{driver.pedalBoxPos}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
 
           <div className="selected-driver">

@@ -164,7 +164,69 @@ export default function IssueTable() {
           />          
       </FiltersBase>
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="md:hidden space-y-3">
+        <div className="flex justify-end">
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-blue-500 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-600 focus:outline-none"
+          >
+            Add Issue
+          </button>
+        </div>
+
+        {issues.map((issue) => (
+          <button
+            key={issue.id}
+            type="button"
+            onClick={() => {
+              setSelectedIssue(issue);
+              setIsModalOpen(true);
+            }}
+            className="w-full text-left rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-sm font-semibold text-gray-900">Issue #{issue.issue_number}</p>
+              <span className={`text-xs font-medium px-2.5 py-0.5 rounded ${getStatusColor(issue.status)}`}>
+                {issue.status || "Unknown"}
+              </span>
+            </div>
+
+            <p className="mt-2 text-sm font-medium text-gray-900 break-words">{issue.synopsis}</p>
+            <p className="mt-2 text-xs text-gray-600">Date: {issue.date}</p>
+            <p className="mt-1 text-xs text-gray-600 break-words">Driver: {issue.drivers || "Unknown"}</p>
+
+            <div className="mt-3 flex flex-wrap gap-1">
+              {issue.subsystems.length > 0 ? (
+                issue.subsystems.map((subsystem) => (
+                  <span
+                    key={subsystem}
+                    className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded"
+                  >
+                    {subsystem}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-gray-500 italic">No subsystem tags</span>
+              )}
+            </div>
+
+            <div className="mt-3">
+              <span className={`text-xs font-medium px-2.5 py-0.5 rounded ${getPriorityColor(issue.priority)}`}>
+                Priority: {issue.priority || "Unknown"}
+              </span>
+            </div>
+          </button>
+        ))}
+
+        {issues.length === 0 && !isLoading && (
+          <div className="rounded-lg border border-gray-200 bg-white px-4 py-8 text-center text-gray-500">
+            No issues found. Tap "Add Issue" to create one.
+          </div>
+        )}
+      </div>
+
+      <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full font-face table-fixed">
           <colgroup>
             <col style={{ width: "10%" }} />
@@ -177,20 +239,20 @@ export default function IssueTable() {
           </colgroup>
           <thead>
             <tr className="border-b border-gray-100">
-              <th className="px-6 py-4 text-left font-medium text-lg">
+              <th className="px-3 py-3 text-left font-medium text-base sm:px-6 sm:py-4 sm:text-lg">
                 Issue #
               </th>
-              <th className="px-6 py-4 text-left font-medium hidden sm:table-cell">Driver</th>
-              <th className="px-6 py-4 text-left font-medium">Date</th>
-              <th className="px-6 py-4 text-left font-medium">Synopsis</th>
-              <th className="px-6 py-4 text-left font-medium hidden sm:table-cell">Subsystems</th>
-              <th className="px-6 py-4 text-left font-medium">Priority</th>
-              <th className="px-6 py-4 text-left font-medium">
+              <th className="px-3 py-3 text-left font-medium hidden sm:table-cell sm:px-6 sm:py-4">Driver</th>
+              <th className="px-3 py-3 text-left font-medium sm:px-6 sm:py-4">Date</th>
+              <th className="px-3 py-3 text-left font-medium sm:px-6 sm:py-4">Synopsis</th>
+              <th className="px-3 py-3 text-left font-medium hidden sm:table-cell sm:px-6 sm:py-4">Subsystems</th>
+              <th className="px-3 py-3 text-left font-medium sm:px-6 sm:py-4">Priority</th>
+              <th className="px-3 py-3 text-left font-medium sm:px-6 sm:py-4">
                 <div className="flex items-center justify-between">
                   <span>Status</span>
                   <button
                     onClick={() => setIsAddModalOpen(true)}
-                    className="ml-4 bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 focus:outline-none"
+                    className="ml-2 bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 focus:outline-none sm:ml-4"
                   >
                     Add
                   </button>
@@ -216,29 +278,29 @@ export default function IssueTable() {
                 tabIndex={0}
               >
                 {/* Issue # */}
-                <td className="px-6 py-4 sm:py-3 text-lg font-medium">
+                <td className="px-3 py-3 text-base font-medium sm:px-6 sm:py-3 sm:text-lg">
                   {issue.issue_number}
                 </td>
 
                 {/* Driver (hidden on xs) */}
-                <td className="hidden sm:table-cell px-6 py-4 sm:py-3 text-gray-600">
+                <td className="hidden sm:table-cell px-3 py-3 text-gray-600 sm:px-6 sm:py-3">
                   <div className="break-words">{issue.drivers}</div>
                 </td>
 
                 {/* Date */}
-                <td className="px-6 py-4 sm:py-3 text-gray-600 whitespace-nowrap">
+                <td className="px-3 py-3 text-gray-600 whitespace-nowrap sm:px-6 sm:py-3">
                   {issue.date}
                 </td>
 
                 {/* Synopsis */}
-                <td className="px-6 py-4 sm:py-3">
+                <td className="px-3 py-3 sm:px-6 sm:py-3">
                   <div className="font-medium break-words">
                     {issue.synopsis}
                   </div>
                 </td>
 
                 {/* Subsystems (hidden on xs) */}
-                <td className="hidden sm:table-cell px-6 py-4 sm:py-3">
+                <td className="hidden sm:table-cell px-3 py-3 sm:px-6 sm:py-3">
                   <div className="flex flex-wrap gap-1">
                     {issue.subsystems.length > 0 ? (
                       issue.subsystems.map((subsystem) => (
@@ -256,7 +318,7 @@ export default function IssueTable() {
                 </td>
 
                 {/* Priority */}
-                <td className="hidden md:table-cell px-6 py-4 sm:py-3">
+                <td className="hidden md:table-cell px-3 py-3 sm:px-6 sm:py-3">
                   <span
                     className={`text-xs font-medium px-2.5 py-0.5 rounded ${getPriorityColor(
                       issue.priority
@@ -267,7 +329,7 @@ export default function IssueTable() {
                 </td>
 
                 {/* Status (wider) */}
-                <td className="px-6 py-4 sm:py-3 w-32 sm:w-40">
+                <td className="px-3 py-3 w-32 sm:w-40 sm:px-6 sm:py-3">
                   <span
                     className={`text-xs font-medium px-2.5 py-0.5 rounded ${getStatusColor(
                       issue.status
@@ -280,13 +342,14 @@ export default function IssueTable() {
             ))}
             {issues.length === 0 && !isLoading && (
               <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={7} className="px-3 py-8 text-center text-gray-500 sm:px-6">
                   No issues found. Click "Add Issue" to create one.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {!isUpdating && 

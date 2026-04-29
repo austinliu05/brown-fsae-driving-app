@@ -115,7 +115,7 @@ export default function FeedbackModal({
       }}
     >
       <div className="flex items-center justify-center p-4">
-        <div ref={scrollContainerRef} className="w-full max-w-3xl h-[80vh] max-h-[80vh] bg-white rounded shadow overflow-auto">
+        <div ref={scrollContainerRef} className="w-full max-w-3xl max-h-[90vh] sm:max-h-[80vh] bg-white rounded shadow overflow-auto">
           <div className="p-6">
             {editMode ? (
               <>
@@ -148,7 +148,7 @@ export default function FeedbackModal({
                     <div className="space-y-4">
                       {/* Driver + Date */}
                       {currentPage === 0 && (
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                           <div>
                             <label className="block text-sm font-medium mb-1">Driver</label>
                             <input
@@ -197,12 +197,12 @@ export default function FeedbackModal({
                         })}
                       </div>
 
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex gap-2">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex w-full gap-2 sm:w-auto">
                           <button
                             type="button"
                             onClick={goPrev}
-                            className="px-4 py-2 border rounded"
+                            className="flex-1 px-4 py-2 border rounded sm:flex-none"
                             disabled={isLoading || currentPage === 0}
                           >
                             Prev
@@ -211,7 +211,7 @@ export default function FeedbackModal({
                             <button
                               type="button"
                               onClick={goNext}
-                              className="px-4 py-2 bg-gray-800 text-white rounded"
+                              className="flex-1 px-4 py-2 bg-gray-800 text-white rounded sm:flex-none"
                               disabled={isLoading}
                             >
                               Next
@@ -220,7 +220,7 @@ export default function FeedbackModal({
                             <button
                               type="submit"
                               onClick={handleSubmit}
-                              className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
+                              className="flex-1 px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300 sm:flex-none"
                               disabled={isLoading}
                             >
                               {isLoading ? "Saving..." : "Save"}
@@ -228,14 +228,14 @@ export default function FeedbackModal({
                           )}
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="flex w-full gap-2 sm:w-auto">
                           <button
                             type="button"
                             onClick={() => {
                               setEditMode(false);
                               setEditedFeedback({ ...feedback, responses: { ...(feedback.responses || {}) } } as Feedback);
                             }}
-                            className="px-4 py-2 border rounded"
+                            className="flex-1 px-4 py-2 border rounded sm:flex-none"
                             disabled={isLoading}
                           >
                             Cancel
@@ -243,7 +243,7 @@ export default function FeedbackModal({
                           <button
                             type="button"
                             onClick={() => setShowDeleteConfirm(true)}
-                            className="px-4 py-2 bg-red-500 text-white rounded disabled:bg-red-300"
+                            className="flex-1 px-4 py-2 bg-red-500 text-white rounded disabled:bg-red-300 sm:flex-none"
                             disabled={isLoading}
                           >
                             {isLoading ? "Deleting..." : "Delete"}

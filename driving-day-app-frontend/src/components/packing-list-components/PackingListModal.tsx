@@ -76,22 +76,22 @@ export default function PackingListModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="p-6 w-full" style={{ minWidth: "520px" }}>
+      <div className="flex max-h-[90vh] w-full flex-col overflow-y-auto p-4 sm:p-6">
         {/* Header */}
-        <div className="mb-1">
+        <div className="mb-3">
           <input
             type="text"
             value={listName}
             onChange={(e) => setListName(e.target.value)}
-            className="text-xl font-bold border-b border-transparent hover:border-gray-300 focus:border-blue-400 focus:outline-none bg-transparent w-full"
+            className="w-full border-b border-transparent bg-transparent text-lg font-bold focus:border-blue-400 focus:outline-none hover:border-gray-300 sm:text-xl"
           />
           <input
             type="text"
             value={listDescription}
             onChange={(e) => setListDescription(e.target.value)}
-            className="text-sm text-gray-500 border-b border-transparent hover:border-gray-300 focus:border-blue-400 focus:outline-none bg-transparent w-full mt-1"
+            className="mt-1 w-full border-b border-transparent bg-transparent text-sm text-gray-500 focus:border-blue-400 focus:outline-none hover:border-gray-300"
           />
-          <div className="flex gap-2 mt-2">
+          <div className="mt-3 flex flex-wrap gap-2">
             {(["Standard", "Subsystems"] as PackingCategory[]).map((cat) => (
               <button
                 key={cat}
@@ -110,10 +110,10 @@ export default function PackingListModal({
         </div>
 
         {/* Item list  */}
-        <div className="space-y-1 mb-2" style={{ maxHeight: "320px", overflowY: "auto" }}>
+        <div className="mb-2 max-h-[42vh] space-y-1 overflow-y-auto pr-1 sm:max-h-[320px]">
           {items.map((label, idx) => (
-            <div key={`${label}-${idx}`} className="flex items-center gap-2 py-2 px-2 rounded hover:bg-gray-50 group">
-              <div className="flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div key={`${label}-${idx}`} className="group flex items-start gap-2 rounded px-2 py-2 hover:bg-gray-50 sm:items-center">
+              <div className="flex flex-col gap-0.5 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
                 <button
                   onClick={() => handleMoveItem(idx, -1)}
                   disabled={idx === 0}
@@ -134,7 +134,7 @@ export default function PackingListModal({
               <span className="flex-1 text-sm">{label}</span>
               <button
                 onClick={() => handleDeleteItem(label)}
-                className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 text-xs transition-opacity"
+                className="text-xs text-red-400 transition-opacity hover:text-red-600 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
               >
                 ✕
               </button>
@@ -146,7 +146,7 @@ export default function PackingListModal({
         </div>
 
         {/* Add new item */}
-        <div className="flex gap-2 mt-4 pt-3 border-t border-gray-100">
+        <div className="mt-4 flex flex-col gap-2 border-t border-gray-100 pt-3 sm:flex-row">
           <input
             ref={inputRef}
             type="text"
@@ -154,30 +154,30 @@ export default function PackingListModal({
             onChange={(e) => setNewItemLabel(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
             placeholder="New item..."
-            className="flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full flex-1 rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
           <button
             onClick={handleAddItem}
             disabled={!newItemLabel.trim()}
-            className="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 disabled:bg-blue-200"
+            className="rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600 disabled:bg-blue-200 sm:w-auto"
           >
             Add
           </button>
         </div>
 
         {/* Footer buttons */}
-        <div className="flex justify-between mt-4">
+        <div className="mt-4 flex flex-col-reverse gap-2 border-t border-gray-100 pt-3 sm:flex-row sm:justify-between">
           <button
             onClick={async () => { await onDelete(template.id); onClose(); }}
-            className="px-3 py-2 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+            className="rounded bg-red-500 px-3 py-2 text-sm text-white hover:bg-red-600"
           >
             Delete
           </button>
-          <div className="flex gap-2">
-            <button onClick={handleSaveAsCurrent} className="px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <button onClick={handleSaveAsCurrent} className="rounded bg-green-500 px-3 py-2 text-sm text-white hover:bg-green-600">
               Save
             </button>
-            <button onClick={handleSaveAsNew} className="px-3 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
+            <button onClick={handleSaveAsNew} className="rounded bg-blue-500 px-3 py-2 text-sm text-white hover:bg-blue-600">
               Save as New
             </button>
           </div>

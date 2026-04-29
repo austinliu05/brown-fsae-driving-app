@@ -143,6 +143,10 @@ export default function FeedbackTable() {
     fetchFeedbackPaginated("", "")
   };
 
+  const filteredFeedback = feedback.filter(
+    (feed) => !driverNameFilter || feed.driver.toLowerCase().includes(driverNameFilter.toLowerCase())
+  );
+
   return (
     <>
       {error && <p className="text-red-500 mb-4">{error}</p>}
@@ -152,18 +156,18 @@ export default function FeedbackTable() {
         <FiltersBase>
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">Driver</label>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
               <input 
                 type="text" 
                 value={driverNameFilter} 
                 onChange={(e) => setDriverNameFilter(e.target.value)} 
                 placeholder="Search by name..."
-                className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px]"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0 sm:min-w-[150px] sm:w-auto"
               />
               {driverNameFilter && (
                 <button 
                   onClick={() => setDriverNameFilter("")} 
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap"
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap self-start sm:self-auto"
                 >
                   Clear
                 </button>
@@ -173,17 +177,17 @@ export default function FeedbackTable() {
           
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">Date Filter</label>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
               <input 
                 type="date" 
                 value={dateFilter} 
                 onChange={(e) => setDateFilter(e.target.value)} 
-                className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px]"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0 sm:min-w-[150px] sm:w-auto"
               />
               {dateFilter && (
                 <button 
                   onClick={() => setDateFilter("")} 
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap"
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap self-start sm:self-auto"
                 >
                   Clear
                 </button>
@@ -229,7 +233,25 @@ export default function FeedbackTable() {
 
                   <div className="mt-2">
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden w-full">
-                      <table className="w-full min-w-full font-face table-auto">
+                      <div className="md:hidden space-y-2 p-3">
+                        {items.map((feed) => (
+                          <button
+                            key={feed.id}
+                            type="button"
+                            onClick={() => { setSelectedFeedback(feed); setIsModalOpen(true); }}
+                            className="w-full text-left rounded-lg border border-gray-200 bg-white p-3"
+                          >
+                            <p className="text-sm font-semibold text-gray-900">Feedback #{feed.feedback_number}</p>
+                            <p className="mt-1 text-xs text-gray-600 break-words">Driver: {feed.driver}</p>
+                            <p className="mt-1 text-xs text-gray-600">
+                              Date: {feed.date ? feed.date.toString().slice(0, 10) : ""}
+                            </p>
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="hidden md:block overflow-x-auto">
+                      <table className="w-full font-face table-auto">
                         <colgroup>
                           <col style={{ width: "25%" }} />
                           <col style={{ width: "25%" }} />
@@ -237,9 +259,9 @@ export default function FeedbackTable() {
                         </colgroup>
                         <thead>
                           <tr className="border-b border-gray-100">
-                            <th className="px-6 py-4 text-left font-medium text-lg">Feedback #</th>
-                            <th className="px-6 py-4 text-left font-medium hidden sm:table-cell">Driver</th>
-                            <th className="px-6 py-4 text-left font-medium">Driving Day Date</th>
+                            <th className="px-3 py-3 text-left font-medium text-base sm:px-6 sm:py-4 sm:text-lg">Feedback #</th>
+                            <th className="px-3 py-3 text-left font-medium hidden sm:table-cell sm:px-6 sm:py-4">Driver</th>
+                            <th className="px-3 py-3 text-left font-medium sm:px-6 sm:py-4">Driving Day Date</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -250,13 +272,14 @@ export default function FeedbackTable() {
                               className={`odd:bg-white even:bg-blue-50 hover:bg-gray-200 cursor-pointer ${index !== items.length - 1 ? "border-b border-gray-100" : ""}`}
                               tabIndex={0}
                             >
-                              <td className="px-6 py-4 sm:py-3 text-lg font-medium">{feed.feedback_number}</td>
-                              <td className="hidden sm:table-cell px-6 py-4 sm:py-3 text-gray-600"><div className="break-words">{feed.driver}</div></td>
-                              <td className="px-6 py-4 sm:py-3 text-gray-600 whitespace-nowrap">{feed.date ? feed.date.toString().slice(0,10) : ""}</td>
+                              <td className="px-3 py-3 text-base font-medium sm:px-6 sm:py-3 sm:text-lg">{feed.feedback_number}</td>
+                              <td className="hidden sm:table-cell px-3 py-3 text-gray-600 sm:px-6 sm:py-3"><div className="break-words">{feed.driver}</div></td>
+                              <td className="px-3 py-3 text-gray-600 whitespace-nowrap sm:px-6 sm:py-3">{feed.date ? feed.date.toString().slice(0,10) : ""}</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
+                      </div>
                     </div>
                   </div>
                 </details>
@@ -265,8 +288,43 @@ export default function FeedbackTable() {
         </div>
       ) : (
         // Flat table view (existing)
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden w-full">
-          <table className="w-full min-w-full font-face table-auto">
+        <>
+          <div className="md:hidden space-y-3">
+            <div className="flex justify-end">
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="bg-blue-500 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-600 focus:outline-none"
+              >
+                Add Feedback
+              </button>
+            </div>
+
+            {filteredFeedback.map((feed) => (
+              <button
+                key={feed.id}
+                type="button"
+                onClick={() => {
+                  setSelectedFeedback(feed);
+                  setIsModalOpen(true);
+                }}
+                className="w-full text-left rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+              >
+                <p className="text-sm font-semibold text-gray-900">Feedback #{feed.feedback_number}</p>
+                <p className="mt-1 text-xs text-gray-600 break-words">Driver: {feed.driver}</p>
+                <p className="mt-1 text-xs text-gray-600">Date: {feed.date ? feed.date.toString().slice(0, 10) : ""}</p>
+              </button>
+            ))}
+
+            {filteredFeedback.length === 0 && !isLoading && (
+              <div className="rounded-lg border border-gray-200 bg-white px-4 py-8 text-center text-gray-500">
+                No feedback found. Tap "Add Feedback" to create one.
+              </div>
+            )}
+          </div>
+
+          <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden w-full">
+            <div className="overflow-x-auto">
+          <table className="w-full font-face table-auto">
             <colgroup>
               <col style={{ width: "25%" }} />
               <col style={{ width: "25%" }} />
@@ -274,14 +332,14 @@ export default function FeedbackTable() {
             </colgroup>
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="px-6 py-4 text-left font-medium text-lg">Feedback #</th>
-                <th className="px-6 py-4 text-left font-medium hidden sm:table-cell">Driver</th>
-                <th className="px-6 py-4 text-left font-medium">
+                <th className="px-3 py-3 text-left font-medium text-base sm:px-6 sm:py-4 sm:text-lg">Feedback #</th>
+                <th className="px-3 py-3 text-left font-medium hidden sm:table-cell sm:px-6 sm:py-4">Driver</th>
+                <th className="px-3 py-3 text-left font-medium sm:px-6 sm:py-4">
                   <div className="flex items-center justify-between">
                     <span>Driving Day Date</span>
                     <button
                       onClick={() => setIsAddModalOpen(true)}
-                      className="ml-4 bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 focus:outline-none"
+                      className="ml-2 bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 focus:outline-none sm:ml-4"
                     >
                       Add
                     </button>
@@ -290,36 +348,36 @@ export default function FeedbackTable() {
               </tr>
             </thead>
             <tbody>
-              {feedback
-                .filter(feed => !driverNameFilter || feed.driver.toLowerCase().includes(driverNameFilter.toLowerCase()))
-                .map((feed, index) => (
+              {filteredFeedback.map((feed, index) => (
                 <tr
                   key={feed.id}
                   onClick={() => {
                     setSelectedFeedback(feed);
                     setIsModalOpen(true);
                   }}
-                  className={`odd:bg-white even:bg-blue-50 hover:bg-gray-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${index !== feedback.length - 1 ? "border-b border-gray-100" : ""}`}
+                  className={`odd:bg-white even:bg-blue-50 hover:bg-gray-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${index !== filteredFeedback.length - 1 ? "border-b border-gray-100" : ""}`}
                   tabIndex={0}
                 >
                   {/* Feedback # */}
-                  <td className="px-6 py-4 sm:py-3 text-lg font-medium">{feed.feedback_number}</td>
+                  <td className="px-3 py-3 text-base font-medium sm:px-6 sm:py-3 sm:text-lg">{feed.feedback_number}</td>
 
                   {/* Driver (hidden on xs) */}
-                  <td className="hidden sm:table-cell px-6 py-4 sm:py-3 text-gray-600"><div className="break-words">{feed.driver}</div></td>
+                  <td className="hidden sm:table-cell px-3 py-3 text-gray-600 sm:px-6 sm:py-3"><div className="break-words">{feed.driver}</div></td>
 
                   {/* Date */}
-                  <td className="px-6 py-4 sm:py-3 text-gray-600 whitespace-nowrap">{feed.date ? feed.date.toString().slice(0, 10) : ""}</td>
+                  <td className="px-3 py-3 text-gray-600 whitespace-nowrap sm:px-6 sm:py-3">{feed.date ? feed.date.toString().slice(0, 10) : ""}</td>
                 </tr>
               ))}
-              {feedback.length === 0 && !isLoading && (
+              {filteredFeedback.length === 0 && !isLoading && (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500">No feedback found. Click "Add Feedback" to create one.</td>
+                  <td colSpan={7} className="px-3 py-8 text-center text-gray-500 sm:px-6">No feedback found. Click "Add Feedback" to create one.</td>
                 </tr>
               )}
             </tbody>
           </table>
-        </div>
+          </div>
+          </div>
+        </>
       )}
 
       {!isUpdating && 

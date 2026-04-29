@@ -1,9 +1,8 @@
 .page-button {
     color: white;
-    padding: 0.4rem 0.8rem;
+    padding: 0.55rem 1rem;
     border-radius: 0.5rem;
-    font-size: 0.8rem;
-    margin: 0 0.4rem;
+    font-size: 0.9rem;
 }
 
 .page-button:hover {

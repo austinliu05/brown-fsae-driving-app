@@ -29,11 +29,11 @@ export default function SpecificRunBubble({
       role="button"
       tabIndex={0}
     >
-      <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
+      <div className="mb-4 flex flex-col gap-2 border-b border-gray-100 pb-2 sm:flex-row sm:items-center sm:justify-between">
         <span className="text-lg font-medium">
           <p>Title: {runTitle}</p>
         </span>
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-600 break-words">
           <span className="mr-2">Driver: {driverId}</span>
           <span>Date: {runDate}</span>
         </div>

@@ -131,10 +131,10 @@ export default function PackingListTable() {
 
   return (
     <>
-      <div className="flex items-center justify-end mb-6">
+      <div className="mb-6 flex items-center justify-end">
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-colors"
+          className="w-full rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 sm:w-auto"
         >
           + New List
         </button>
@@ -153,18 +153,18 @@ export default function PackingListTable() {
 
         return (
           <div key={section} className="mb-10">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="mb-4 flex items-center gap-3">
               <h2 className="text-lg font-semibold text-gray-800">{section}</h2>
               <div className="flex-1 h-px bg-gray-200" />
               <span className="text-xs text-gray-400 font-medium">{sectionItems.length} lists</span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
               {sectionItems.map((template, idx) => {
                 const isGeneral = template.name.toLowerCase() === "general";
                 return (
                   <div
                     key={template.id}
-                    className={`relative group rounded-xl p-5 cursor-pointer transition-all duration-200 ${
+                    className={`group relative cursor-pointer rounded-xl p-4 transition-all duration-200 sm:p-5 ${
                       isGeneral
                         ? "bg-green-50 border-2 border-green-400 hover:border-green-500 hover:shadow-lg hover:shadow-green-100"
                         : "bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md"
@@ -187,7 +187,7 @@ export default function PackingListTable() {
                     </div>
 
                     {/* Reorder arrows — visible on hover */}
-                    <div className="absolute top-2 right-2 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute right-2 top-2 flex gap-0.5 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
                       <button
                         onClick={(e) => { e.stopPropagation(); handleMove(template.id, -1); }}
                         disabled={idx === 0}

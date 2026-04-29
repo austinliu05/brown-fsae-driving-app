@@ -212,7 +212,7 @@ export default function IssueModal({
               <form onSubmit={handleSubmit}>
                 {error && <p className="text-red-500 mb-4">{error}</p>}
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                       <label className="block text-sm font-medium mb-1">
                         Driver
@@ -314,7 +314,7 @@ export default function IssueModal({
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                       <label className="block text-sm font-medium mb-1">
                         Priority
@@ -443,14 +443,14 @@ export default function IssueModal({
                     />
                   </div>
 
-                  <div className="flex justify-end gap-2">
+                  <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                     <button
                       type="button"
                       onClick={() => {
                         setEditMode(false);
                         setEditedIssue(issue);
                       }}
-                      className="px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border rounded sm:w-auto"
                       disabled={isLoading}
                     >
                       Cancel
@@ -458,14 +458,14 @@ export default function IssueModal({
                     <button
                       type="button"
                       onClick={() => setShowDeleteConfirm(true)} // Show confirmation dialog
-                      className="px-4 py-2 bg-red-500 text-white rounded disabled:bg-red-300"
+                      className="w-full px-4 py-2 bg-red-500 text-white rounded disabled:bg-red-300 sm:w-auto"
                       disabled={isLoading}
                     >
                       {isLoading ? "Deleting..." : "Delete"}
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
+                      className="w-full px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300 sm:w-auto"
                       disabled={isLoading}
                     >
                       {isLoading ? "Saving..." : "Save"}
