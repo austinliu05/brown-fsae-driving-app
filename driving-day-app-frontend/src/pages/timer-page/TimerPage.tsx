@@ -4,12 +4,12 @@
 Purpose:
 - Lap timer page for recording track session data
 
-Design: 
-- Replica of the iPhone stopwatch, with a main timer, lap recording, a date and 
+Design:
+- Replica of the iPhone stopwatch, with a main timer, lap recording, a date and
   run name identifier and note-taking for each lap and pre-test configs
 
-Functionality: 
-- Lets a team member start/stop a timer, record laps, and jot down notes per lap 
+Functionality:
+- Lets a team member start/stop a timer, record laps, and jot down notes per lap
   and pre-test configuration details
 
 Note: All timing is done in-browser (no backend needed)
@@ -19,10 +19,11 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import PageBase from '../../components/base-components/PageBase';
 import LapTable from '../../components/timer-components/LapTable';
 import PreTestConfigs from '../../components/timer-components/PreTestConfigs';
+import PastRunsSection from '../../components/timer-components/PastRunsSection';
 import { formatTime } from '../../utils/formatTime';
 
 /*
-Time state machine logic (simplified): 
+Time state machine logic (simplified):
     idle     (timer hasn't started yet or was just reset)
     running  (timer is actively recording time)
     stopped  (timer is paused, can either resume or reset from here)
@@ -35,15 +36,6 @@ interface Lap {
   notes: string;    // optional notes for lap (configs/specs)
 }
 
-// A saved session from a previous driving day
-interface PastRun {
-  id: string;
-  date: string;           // MM/DD/YYYY — used for grouping and filtering
-  runName: string;        // e.g. "AutoX_1"
-  preTestConfigs: string;
-  laps: Lap[];
-}
-
 
 const TimerPage: React.FC = () => {
   // --- UI state (determines what gets rendered) ---
@@ -54,33 +46,6 @@ const TimerPage: React.FC = () => {
   const [preTestConfigs, setPreTestConfigs] = useState<string>('');
   const [runDate, setRunDate] = useState<string>('');
   const [runName, setRunName] = useState<string>('');
-
-  // --- Past Runs state ---
-  const [pastRuns, setPastRuns] = useState<PastRun[]>([]);         // empty until backend is up
-  /*const [pastRuns, setPastRuns] = useState<PastRun[]>([
-    {
-      id: '1',
-      date: '04/21/2026',
-      runName: 'AutoX_1',
-      preTestConfigs: 'Track: Lot B, Conditions: dry, Driver: Tristan',
-      laps: [
-        { lapNumber: 1, duration: 62340, notes: '' },
-        { lapNumber: 2, duration: 61200, notes: 'understeer on turn 3' },
-        { lapNumber: 3, duration: 63100, notes: '' },
-      ],
-    },
-    {
-      id: '2',
-      date: '04/21/2026',
-      runName: 'AutoX_2',
-      preTestConfigs: 'Track: Lot B, Conditions: dry, Driver: Tristan',
-      laps: [
-        { lapNumber: 1, duration: 60800, notes: '' },
-        { lapNumber: 2, duration: 61500, notes: '' },
-      ],
-    },
-  ]); */
-  const [selectedDate, setSelectedDate] = useState<string>('All'); // date filter dropdown
 
   // --- Refs for timing accuracy ---
   /* use refs (not state) for the raw timing values because requestAnimationFrame
@@ -166,24 +131,6 @@ const TimerPage: React.FC = () => {
     );
   };
 
-  // Updates the pre-test configs text for a specific past run
-  const updatePastRunConfigs = (runId: string, value: string) => {
-    setPastRuns(prev =>
-      prev.map(run => run.id === runId ? { ...run, preTestConfigs: value } : run)
-    );
-  };
-
-  // Updates the notes for a specific lap within a specific past run
-  const updatePastRunLapNotes = (runId: string, lapNumber: number, value: string) => {
-    setPastRuns(prev =>
-      prev.map(run =>
-        run.id === runId
-          ? { ...run, laps: run.laps.map(lap => lap.lapNumber === lapNumber ? { ...lap, notes: value } : lap) }
-          : run
-      )
-    );
-  };
-
   /*
   - Auto-formats the date input as MM/DD/YYYY while the user types
   - Strips anything that isn't a digit, then inserts slashes at the right positions
@@ -202,20 +149,12 @@ const TimerPage: React.FC = () => {
   };
 
   /*
-  Cancel the animation loop if the user navigates away while the timer is 
+  Cancel the animation loop if the user navigates away while the timer is
   still running, otherwise the RAF loop keeps firing in the background (memory leak)
   */
   useEffect(() => {
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
-
-  // Unique dates from past runs for the filter dropdown
-  const uniqueDates = Array.from(new Set(pastRuns.map(r => r.date)));
-
-  // Runs to display — all runs, or only those matching the selected date
-  const filteredRuns = selectedDate === 'All'
-    ? pastRuns
-    : pastRuns.filter(r => r.date === selectedDate);
 
   return (
     <PageBase>
@@ -308,51 +247,9 @@ const TimerPage: React.FC = () => {
 
       </div>
 
-      {/* Past Runs — lives outside the centered timer column so it uses full page width */}
-      <div className="mt-10">
-        <h2 className="text-2xl font-semibold mb-1">Past Runs</h2>
+      {/* Past Runs — extracted into PastRunsSection component */}
+      <PastRunsSection />
 
-        {/* Date filter dropdown */}
-        <select
-          value={selectedDate}
-          onChange={e => setSelectedDate(e.target.value)}
-          className="px-4 py-2 border border-gray-200 rounded-md bg-white mb-4 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-        >
-          <option value="All">All Dates</option>
-          {uniqueDates.map(date => (
-            <option key={date} value={date}>{date}</option>
-          ))}
-        </select>
-
-        {/* Empty state — shown when there are no runs matching the filter */}
-        {filteredRuns.length === 0 && (
-          <div className="text-gray-500 italic">No past runs to display.</div>
-        )}
-
-        {/* Accordion — one collapsible row per run */}
-        {filteredRuns.map(run => (
-          <details key={run.id} className="mb-2 p-3 border rounded">
-            <summary className="flex items-center justify-between font-semibold cursor-pointer">
-              <span>{run.runName}</span>
-              <span className="text-sm text-gray-500">{run.date}</span>
-            </summary>
-            <div className="mt-4">
-              <PreTestConfigs
-                value={run.preTestConfigs}
-                onChange={v => updatePastRunConfigs(run.id, v)}
-                className="w-full"
-              />
-              <div className="mt-4">
-                <LapTable
-                  laps={run.laps}
-                  onUpdateNotes={(lapNumber, value) => updatePastRunLapNotes(run.id, lapNumber, value)}
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </details>
-        ))}
-      </div>
     </PageBase>
   );
 };
