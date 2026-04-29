@@ -1,4 +1,9 @@
-.PHONY: build deploy-prod deploy-test
+.PHONY: run build deploy-prod deploy-test
+
+# Run development build
+run:
+	@echo "Running dev server..."
+	npm start
 
 # Build target
 build:
