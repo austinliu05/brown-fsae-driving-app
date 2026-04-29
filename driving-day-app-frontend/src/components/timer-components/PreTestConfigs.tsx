@@ -7,11 +7,12 @@ import React from 'react';
 interface PreTestConfigsProps {
   value: string;
   onChange: (value: string) => void;
+  className?: string;  // optional width override — defaults to max-w-md for live timer
 }
 
-const PreTestConfigs: React.FC<PreTestConfigsProps> = ({ value, onChange }) => {
+const PreTestConfigs: React.FC<PreTestConfigsProps> = ({ value, onChange, className = 'max-w-md' }) => {
   return (
-    <div className="w-full max-w-md mt-10">
+    <div className={`w-full ${className} mt-10`}>
       <h2 className="text-2xl font-semibold mb-1">Pre-Test Configs</h2>
       <p className="text-xs text-gray-400 mb-2">e.g. Track: Lot B, Conditions: dry, Driver: Tristan, Recorded by: Ethan, Setup: &lt;car specs&gt;, Testing: new brakes, absent shifting...</p>
       <textarea

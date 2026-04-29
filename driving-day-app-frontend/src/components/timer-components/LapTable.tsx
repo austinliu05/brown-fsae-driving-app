@@ -5,6 +5,7 @@
 // When used in the past runs viewer, those props are omitted and only recorded laps are shown.
 
 import React from 'react';
+import { formatTime } from '../../utils/formatTime';
 
 type TimerState = 'idle' | 'running' | 'stopped';
 
@@ -19,17 +20,11 @@ interface LapTableProps {
   onUpdateNotes: (lapNumber: number, value: string) => void;
   lapElapsed?: number;     // only passed in live timer — drives the live current lap row
   timerState?: TimerState; // only passed in live timer — controls whether the live row is visible
+  className?: string;      // optional width override — defaults to max-w-md for live timer
 }
 
-// Converts milliseconds to MM:SS.cs display format
-function formatTime(ms: number): string {
-  const minutes = Math.floor(ms / 60000);
-  const seconds = Math.floor((ms % 60000) / 1000);
-  const centiseconds = Math.floor((ms % 1000) / 10);
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(centiseconds).padStart(2, '0')}`;
-}
 
-const LapTable: React.FC<LapTableProps> = ({ laps, onUpdateNotes, lapElapsed = 0, timerState = 'idle' }) => {
+const LapTable: React.FC<LapTableProps> = ({ laps, onUpdateNotes, lapElapsed = 0, timerState = 'idle', className = 'max-w-md' }) => {
   // Only highlight best/worst laps once there are 2+ recorded laps
   const minDuration = laps.length >= 2 ? Math.min(...laps.map(l => l.duration)) : null;
   const maxDuration = laps.length >= 2 ? Math.max(...laps.map(l => l.duration)) : null;
@@ -46,7 +41,7 @@ const LapTable: React.FC<LapTableProps> = ({ laps, onUpdateNotes, lapElapsed = 0
   if (laps.length === 0 && timerState === 'idle') return null;
 
   return (
-    <div className="w-full max-w-md bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div className={`w-full ${className} bg-white rounded-lg border border-gray-200 overflow-hidden`}>
       {/* Live current lap row — only shown during an active session */}
       {timerState !== 'idle' && (
         <div className="flex items-center justify-between px-4 py-3 text-gray-400 border-b border-gray-100">

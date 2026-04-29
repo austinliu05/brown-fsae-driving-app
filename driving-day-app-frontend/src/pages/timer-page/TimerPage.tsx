@@ -19,6 +19,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import PageBase from '../../components/base-components/PageBase';
 import LapTable from '../../components/timer-components/LapTable';
 import PreTestConfigs from '../../components/timer-components/PreTestConfigs';
+import { formatTime } from '../../utils/formatTime';
 
 /*
 Time state machine logic (simplified): 
@@ -34,14 +35,15 @@ interface Lap {
   notes: string;    // optional notes for lap (configs/specs)
 }
 
-// Converts a raw millisecond count into MM:SS.cs format (cs = centiseconds)
-// use centiseconds (hundredths of a second) to match how the iPhone stopwatch displays time
-function formatTime(ms: number): string {
-  const minutes = Math.floor(ms / 60000);
-  const seconds = Math.floor((ms % 60000) / 1000);   
-  const centiseconds = Math.floor((ms % 1000) / 10); 
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(centiseconds).padStart(2, '0')}`;
+// A saved session from a previous driving day
+interface PastRun {
+  id: string;
+  date: string;           // MM/DD/YYYY — used for grouping and filtering
+  runName: string;        // e.g. "AutoX_1"
+  preTestConfigs: string;
+  laps: Lap[];
 }
+
 
 const TimerPage: React.FC = () => {
   // --- UI state (determines what gets rendered) ---
@@ -52,6 +54,33 @@ const TimerPage: React.FC = () => {
   const [preTestConfigs, setPreTestConfigs] = useState<string>('');
   const [runDate, setRunDate] = useState<string>('');
   const [runName, setRunName] = useState<string>('');
+
+  // --- Past Runs state ---
+  const [pastRuns, setPastRuns] = useState<PastRun[]>([]);         // empty until backend is up
+  /*const [pastRuns, setPastRuns] = useState<PastRun[]>([
+    {
+      id: '1',
+      date: '04/21/2026',
+      runName: 'AutoX_1',
+      preTestConfigs: 'Track: Lot B, Conditions: dry, Driver: Tristan',
+      laps: [
+        { lapNumber: 1, duration: 62340, notes: '' },
+        { lapNumber: 2, duration: 61200, notes: 'understeer on turn 3' },
+        { lapNumber: 3, duration: 63100, notes: '' },
+      ],
+    },
+    {
+      id: '2',
+      date: '04/21/2026',
+      runName: 'AutoX_2',
+      preTestConfigs: 'Track: Lot B, Conditions: dry, Driver: Tristan',
+      laps: [
+        { lapNumber: 1, duration: 60800, notes: '' },
+        { lapNumber: 2, duration: 61500, notes: '' },
+      ],
+    },
+  ]); */
+  const [selectedDate, setSelectedDate] = useState<string>('All'); // date filter dropdown
 
   // --- Refs for timing accuracy ---
   /* use refs (not state) for the raw timing values because requestAnimationFrame
@@ -137,6 +166,24 @@ const TimerPage: React.FC = () => {
     );
   };
 
+  // Updates the pre-test configs text for a specific past run
+  const updatePastRunConfigs = (runId: string, value: string) => {
+    setPastRuns(prev =>
+      prev.map(run => run.id === runId ? { ...run, preTestConfigs: value } : run)
+    );
+  };
+
+  // Updates the notes for a specific lap within a specific past run
+  const updatePastRunLapNotes = (runId: string, lapNumber: number, value: string) => {
+    setPastRuns(prev =>
+      prev.map(run =>
+        run.id === runId
+          ? { ...run, laps: run.laps.map(lap => lap.lapNumber === lapNumber ? { ...lap, notes: value } : lap) }
+          : run
+      )
+    );
+  };
+
   /*
   - Auto-formats the date input as MM/DD/YYYY while the user types
   - Strips anything that isn't a digit, then inserts slashes at the right positions
@@ -162,9 +209,17 @@ const TimerPage: React.FC = () => {
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
+  // Unique dates from past runs for the filter dropdown
+  const uniqueDates = Array.from(new Set(pastRuns.map(r => r.date)));
+
+  // Runs to display — all runs, or only those matching the selected date
+  const filteredRuns = selectedDate === 'All'
+    ? pastRuns
+    : pastRuns.filter(r => r.date === selectedDate);
+
   return (
     <PageBase>
-      <h1>Lap Timer</h1>
+      <h1 className="mb-6 text-2xl font-semibold">Lap Timer</h1>
 
       <div className="flex flex-col items-center">
         {/* Date and run name — filled in before starting a session */}
@@ -250,6 +305,53 @@ const TimerPage: React.FC = () => {
           value={preTestConfigs}
           onChange={setPreTestConfigs}
         />
+
+      </div>
+
+      {/* Past Runs — lives outside the centered timer column so it uses full page width */}
+      <div className="mt-10">
+        <h2 className="text-2xl font-semibold mb-1">Past Runs</h2>
+
+        {/* Date filter dropdown */}
+        <select
+          value={selectedDate}
+          onChange={e => setSelectedDate(e.target.value)}
+          className="px-4 py-2 border border-gray-200 rounded-md bg-white mb-4 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+        >
+          <option value="All">All Dates</option>
+          {uniqueDates.map(date => (
+            <option key={date} value={date}>{date}</option>
+          ))}
+        </select>
+
+        {/* Empty state — shown when there are no runs matching the filter */}
+        {filteredRuns.length === 0 && (
+          <div className="text-gray-500 italic">No past runs to display.</div>
+        )}
+
+        {/* Accordion — one collapsible row per run */}
+        {filteredRuns.map(run => (
+          <details key={run.id} className="mb-2 p-3 border rounded">
+            <summary className="flex items-center justify-between font-semibold cursor-pointer">
+              <span>{run.runName}</span>
+              <span className="text-sm text-gray-500">{run.date}</span>
+            </summary>
+            <div className="mt-4">
+              <PreTestConfigs
+                value={run.preTestConfigs}
+                onChange={v => updatePastRunConfigs(run.id, v)}
+                className="w-full"
+              />
+              <div className="mt-4">
+                <LapTable
+                  laps={run.laps}
+                  onUpdateNotes={(lapNumber, value) => updatePastRunLapNotes(run.id, lapNumber, value)}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </details>
+        ))}
       </div>
     </PageBase>
   );
