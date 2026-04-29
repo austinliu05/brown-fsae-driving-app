@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import Modal from "../issues-components/Modal";
+import Modal from "../shared/Modal";
 import DatePicker from "react-datepicker";
 import { updateFeedback, deleteFeedback } from "../../api/api";
 import { Feedback, ResponseValue } from "../../utils/DataTypes";
@@ -115,7 +115,7 @@ export default function FeedbackModal({
       }}
     >
       <div className="flex items-center justify-center p-4">
-        <div ref={scrollContainerRef} className="w-full max-w-3xl h-[80vh] max-h-[80vh] bg-white rounded shadow overflow-auto">
+        <div ref={scrollContainerRef} className="w-full max-w-3xl max-h-[90vh] sm:max-h-[80vh] bg-white rounded shadow overflow-auto">
           <div className="p-6">
             {editMode ? (
               <>

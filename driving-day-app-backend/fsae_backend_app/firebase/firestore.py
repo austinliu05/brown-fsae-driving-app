@@ -648,3 +648,146 @@ def delete_feedback(feedback_id: str):
         print(f"An unexpected error occurred while deleting feedback: {e}")
         return None
 
+
+def get_latest_packing_list_number():
+    try:
+        main_db = db.collection('packing_lists')
+        query = main_db.order_by('packing_list_number', direction=firestore.Query.DESCENDING)
+
+        docs = query.limit(1).stream()
+        
+        for doc in docs:
+            doc_data = doc.to_dict()
+            return doc_data['packing_list_number']
+        
+        return 0
+    except Exception as e:
+        print(f"An unexpected error occurred when pulling specific document data (latest packing list number): {e}")
+        return None
+
+def get_all_packing_lists():
+    """
+    Retrieves all packing lists from the 'packing_lists' collection 
+
+    Returns:
+        list: List of dictionaries containing packing list data
+        None: If an error occurs.
+    """
+    try:
+        main_db = db.collection('packing_lists')
+        query = main_db.order_by('created_at', direction=firestore.Query.DESCENDING)
+    
+        
+        docs = query.stream()
+        
+        packing_lists = []
+        for doc in docs:
+            packing_lists_data = doc.to_dict()
+            packing_lists_data['id'] = doc.id
+            packing_lists.append(packing_lists_data)
+                        
+        return packing_lists
+    
+    except Exception as e:
+        print(f"An error occurred while retrieving packing lists: {e}")
+        return None
+    
+
+def add_packing_list(data):
+    """
+    Adds a new packing list to the 'packing_lists' collection 
+
+    Returns:
+        dict: Dictionary with the ID of the newly created packing list
+        None: If an error occurs.
+    """
+    try:
+        if not isinstance(data, dict):
+            print("Input must be a dictionary.")
+            return None
+
+        required_fields = ['name', 'description', 'items']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                print(f"Missing or empty required field: {field}")
+                return None
+
+        data['packing_list_number'] = int(get_latest_packing_list_number()) + 1
+
+        packing_list_data = {
+            'name': data['name'],
+            'description': data['description'],
+            'items': data['items'],
+            'category': data.get('category', 'Subsystems'),
+            'order': data.get('order', data['packing_list_number']),
+            'packing_list_number': data['packing_list_number'],
+            'created_at': firestore.SERVER_TIMESTAMP
+        }
+
+        main_db = db.collection('packing_lists')
+        doc_ref = main_db.document()
+        doc_ref.set(packing_list_data)
+
+        print(f"Packing list '{data['name']}' added with ID: {doc_ref.id}")
+        return {"packing_list_id": doc_ref.id}
+
+    except Exception as e:
+        print(f"An unexpected error occurred while adding packing list: {e}")
+        return None
+    
+def update_packing_list(packing_list_id: str, data: dict):
+    try:
+        if not isinstance(data, dict):
+            print("Input must be a dictionary.")
+            return None
+        if not packing_list_id:
+            print("Packing list ID must be provided.")
+            return None
+
+        packing_list_data = {
+            'name': data.get('name'),
+            'description': data.get('description'),
+            'items': data.get('items'),
+            'category': data.get('category'),
+            'order': data.get('order'),
+            'updated_at': firestore.SERVER_TIMESTAMP
+        }
+        packing_list_data = {k: v for k, v in packing_list_data.items() if v is not None}
+
+        main_db = db.collection('packing_lists')
+        doc_ref = main_db.document(packing_list_id)
+        
+        # Check if document exists
+        if not doc_ref.get().exists:
+            print(f"Packing list with ID {packing_list_id} not found.")
+            return None
+        
+        doc_ref.update(packing_list_data)
+        print(f"Packing list {packing_list_id} updated successfully")
+        return {"packing_list_id": packing_list_id}
+
+    except Exception as e:
+        print(f"An unexpected error occurred while updating packing list: {e}")
+        return None
+
+
+def delete_packing_list(packing_list_id: str):
+    try:
+        if not packing_list_id:
+            print("Packing list ID must be provided.")
+            return None
+
+        main_db = db.collection('packing_lists')
+        doc_ref = main_db.document(packing_list_id)
+        
+        if not doc_ref.get().exists:
+            print(f"Packing list with ID {packing_list_id} not found.")
+            return None
+        
+        doc_ref.delete()
+        print(f"Packing list {packing_list_id} deleted successfully")
+        return {"packing_list_id": packing_list_id}
+
+    except Exception as e:
+        print(f"An unexpected error occurred while deleting packing list: {e}")
+        return None

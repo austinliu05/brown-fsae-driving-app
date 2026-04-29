@@ -32,6 +32,7 @@ const Navbar = () => {
     { to: "/drivers", label: "Drivers" },
     { to: "/issues", label: "Issues" },
     { to: "/feedback", label: "Feedback" },
+    { to: "/packing-list", label: "Packing Lists" },
     { to: "/my-account", label: "My Account" },
   ];
 
@@ -58,7 +59,7 @@ const Navbar = () => {
         />
       )}
 
-      <nav className={`navbar-panel ${isMenuOpen ? "open" : ""}`}>
+      <nav className={`navbar-panel ${isMenuOpen ? "open" : ""}`} aria-hidden={!isMenuOpen}>
         <div className="navbar-panel-header">
           <Link to="/" className="navbar-logo-link" onClick={() => setIsMenuOpen(false)}>
             <img src={logo} alt="Logo" className="navbar-logo" />

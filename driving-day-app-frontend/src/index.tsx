@@ -10,6 +10,7 @@ import HomePage from "./pages/home-page/HomePage";
 import DevPage from "./pages/dev-page/DevPage";
 import IssuesPage from "./pages/issues-page/IssuesPage";
 import MyAccountPage from "./pages/account-page/MyAccountPage";
+import PackingListPage from "./pages/packing-list-page/PackingListPage";
 import FeedbackPage from "./pages/driver-feedback-page/FeedbackPage";
 
 /**
@@ -48,6 +49,11 @@ const router = createBrowserRouter([
       {
         path: "/issues",
         element: <IssuesPage />,
+      },
+      {
+        path: "/packing-list",
+        element: <PackingListPage />,
+
       },
       {
         path: "/feedback",

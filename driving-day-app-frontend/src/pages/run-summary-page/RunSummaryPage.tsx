@@ -43,15 +43,15 @@ const RunSummaryPage: React.FC = () => {
 
         {/** Create Actual Filtering System */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <select className="px-4 py-2 border border-gray-200 rounded-md bg-white min-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+          <select className="w-full px-4 py-2 border border-gray-200 rounded-md bg-white min-w-0 md:min-w-[200px] md:w-auto focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
             <option value="10/15/2024">Date: 10/15/2024</option>
           </select>
 
-          <select className="px-4 py-2 border border-gray-200 rounded-md bg-white min-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+          <select className="w-full px-4 py-2 border border-gray-200 rounded-md bg-white min-w-0 md:min-w-[200px] md:w-auto focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
             <option value="all">Driver: All</option>
           </select>
 
-          <select className="px-4 py-2 border border-gray-200 rounded-md bg-white min-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+          <select className="w-full px-4 py-2 border border-gray-200 rounded-md bg-white min-w-0 md:min-w-[200px] md:w-auto focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
             <option value="engine">Filter by: Engine</option>
           </select>
         </div>

@@ -75,3 +75,4 @@ fsae_backend_app/firebase/serviceAccountKey.json
 .vercel
 
 *.pem
+*.pub

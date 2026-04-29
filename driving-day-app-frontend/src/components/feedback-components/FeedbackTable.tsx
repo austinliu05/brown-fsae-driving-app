@@ -251,7 +251,7 @@ export default function FeedbackTable() {
                       </div>
 
                       <div className="hidden md:block overflow-x-auto">
-                      <table className="w-full min-w-[560px] font-face table-auto">
+                      <table className="w-full font-face table-auto">
                         <colgroup>
                           <col style={{ width: "25%" }} />
                           <col style={{ width: "25%" }} />
@@ -324,7 +324,7 @@ export default function FeedbackTable() {
 
           <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden w-full">
             <div className="overflow-x-auto">
-          <table className="w-full min-w-[560px] font-face table-auto">
+          <table className="w-full font-face table-auto">
             <colgroup>
               <col style={{ width: "25%" }} />
               <col style={{ width: "25%" }} />

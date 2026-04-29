@@ -50,7 +50,7 @@ const DriversList = () => {
             </div>
 
             <div className="hidden md:block overflow-x-auto">
-            <table className="w-full min-w-[720px]">
+            <table className="w-full">
               <thead className="bg-gray-100 border-none">
                 <tr>
                   <th className="border p-3 text-left sm:p-4">Name</th>

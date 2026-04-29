@@ -227,7 +227,7 @@ export default function IssueTable() {
 
       <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-        <table className="w-full min-w-[760px] font-face table-fixed">
+        <table className="w-full font-face table-fixed">
           <colgroup>
             <col style={{ width: "10%" }} />
             <col style={{ width: "10%" }} />

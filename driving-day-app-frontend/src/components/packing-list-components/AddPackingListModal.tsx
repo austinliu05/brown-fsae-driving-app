@@ -1,0 +1,165 @@
+import React, { useState } from "react";
+import Modal from "../shared/Modal";
+import { PackingTemplate, PackingCategory } from "./PackingListTable";
+
+interface AddPackingListModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (newTemplate: PackingTemplate) => Promise<void> | void;
+}
+
+export default function AddPackingListModal({ isOpen, onClose, onSave }: AddPackingListModalProps) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState<PackingCategory>("Subsystems");
+  const [items, setItems] = useState<string[]>([]);
+  const [newItemLabel, setNewItemLabel] = useState("");
+
+  const handleAddItem = () => {
+    const label = newItemLabel.trim();
+    if (!label) return;
+    setItems((prev) => [...prev, label]);
+    setNewItemLabel("");
+  };
+
+  const handleDeleteItem = (label: string) => {
+    setItems((prev) => prev.filter((i) => i !== label));
+  };
+
+  const handleSave = async () => {
+    if (!name.trim()) return;
+    await onSave({
+      id: "",
+      name: name.trim(),
+      description: description.trim(),
+      items,
+      category,
+      order: Date.now(),
+    });
+    setName("");
+    setDescription("");
+    setCategory("Subsystems");
+    setItems([]);
+    setNewItemLabel("");
+    onClose();
+  };
+
+  const handleClose = () => {
+    setName("");
+    setDescription("");
+    setItems([]);
+    setNewItemLabel("");
+    onClose();
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={handleClose}>
+      <div className="flex max-h-[90vh] w-full flex-col overflow-y-auto p-4 sm:p-6">
+
+        {/* Header */}
+        <h2 className="mb-4 text-lg font-bold sm:text-xl">New Packing List</h2>
+
+        {/* Name */}
+        <div className="mb-3">
+          <label className="block text-sm font-medium mb-1">Name</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
+
+        {/* Description */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Description</label>
+          <input
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
+
+        {/* Category */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Category</label>
+          <div className="flex flex-wrap gap-2">
+            {(["Standard", "Subsystems"] as PackingCategory[]).map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setCategory(cat)}
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                  category === cat
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Items list */}
+        <div className="mb-2">
+          <label className="block text-sm font-medium mb-2">Items</label>
+          <div className="space-y-1 mb-3" style={{ maxHeight: "240px", overflowY: "auto" }}>
+            {items.length === 0 && (
+              <p className="text-sm italic text-gray-400 py-2 text-center">No items yet</p>
+            )}
+            {items.map((label) => (
+              <div key={label} className="flex items-center gap-3 py-2 px-2 rounded hover:bg-gray-50 group">
+                <span className="flex-1 text-sm">{label}</span>
+                <button
+                  onClick={() => handleDeleteItem(label)}
+                  className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 text-xs transition-opacity"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Add item input */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newItemLabel}
+              onChange={(e) => setNewItemLabel(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
+              placeholder="New item..."
+              className="w-full flex-1 rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <button
+              onClick={handleAddItem}
+              disabled={!newItemLabel.trim()}
+              className="rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600 disabled:bg-blue-200"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+
+        {/* Footer buttons */}
+        <div className="mt-4 flex flex-col gap-2 border-t border-gray-100 pt-3 sm:flex-row sm:justify-end">
+          <button
+            onClick={handleClose}
+            className="rounded border px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!name.trim()}
+            className="rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600 disabled:bg-blue-200"
+          >
+            Save
+          </button>
+        </div>
+
+      </div>
+    </Modal>
+  );
+}

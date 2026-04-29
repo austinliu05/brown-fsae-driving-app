@@ -4,7 +4,7 @@ import DatePicker from "react-datepicker";
 import { postFeedback } from '../../api/api';
 import { ResponseValue, Feedback, QType } from "../../utils/DataTypes";
 import { QuestionField, toggleMulti, normalizeDateInput, toISODate } from '../../utils/feedbackHelpers';
-import Modal from "../issues-components/Modal";
+import Modal from "../shared/Modal";
 import feedbackQuestionsData from '../../constants/feedbackQuestions.json';
 
 export const questionList: {
@@ -129,7 +129,7 @@ export default function AddFeedbackModal({ isOpen, onClose, onSave }: AddFeedbac
     <Modal isOpen={isOpen} onClose={onClose}>
       {/* Centered, scrollable modal card that takes ~80% of viewport height */}
       <div className="flex items-center justify-center p-4">
-       <div ref={scrollContainerRef} className="w-full max-w-3xl h-[80vh] max-h-[80vh] bg-white rounded shadow overflow-auto">
+       <div ref={scrollContainerRef} className="w-full max-w-3xl max-h-[90vh] sm:max-h-[80vh] bg-white rounded shadow overflow-auto">
           <div className="p-6">
             {currentPage === 0 && (<h2 className="text-xl font-bold mb-4">Driver Feedback</h2>)}
             {error && <p className="text-red-500 mb-4">{error}</p>}
