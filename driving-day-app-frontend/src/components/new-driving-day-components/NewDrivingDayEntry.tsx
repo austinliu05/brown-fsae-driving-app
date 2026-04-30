@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Issue, MOCK_PACKING_LISTS } from "../../utils/DataTypes";
+import { Issue} from "../../utils/DataTypes";
 import { Driver } from "../../utils/DriverType";
-import { getAllIssues, postDrivingDay } from "../../api/api";
+import { getAllIssues, postDrivingDay, getAllPackingLists } from "../../api/api";
 
 export default function NewDrivingDayEntry() {
   const navigate = useNavigate();
   const today = new Date().toISOString().split("T")[0];
+
+  //packing list type 
+  type PackingList = {
+    id: string;
+    name: string;
+    description?: string;
+    items: string[];
+  };
 
   // Form fields
   const [title, setTitle] = useState("");
@@ -19,8 +27,7 @@ export default function NewDrivingDayEntry() {
   const [backendIssues, setBackendIssues] = useState<Issue[]>([]);
 
   // Packing lists — multiple can be added
-  // TODO: Replace MOCK_PACKING_LISTS with data from backend
-  const availablePackingLists = MOCK_PACKING_LISTS;
+  const [availablePackingLists, setAvailablePackingLists] = useState<PackingList[]>([]);
   const [addedPackingListIds, setAddedPackingListIds] = useState<string[]>([]);
 
   // Track which accordions are expanded (by packing list id)
@@ -81,6 +88,23 @@ export default function NewDrivingDayEntry() {
       }
     };
     fetchIssues();
+  }, []);
+
+  // Fetch packing listst from backend 
+  useEffect(() => {
+    const fetchPackingLists = async () => {
+      try {
+        const response = await getAllPackingLists();
+    
+        if (response.data?.packing_lists) {
+          setAvailablePackingLists(response.data.packing_lists);
+        }
+      } catch (err) {
+        console.error("Failed to fetch packing lists:", err);
+      }
+    };
+  
+    fetchPackingLists();
   }, []);
 
   // ── Handlers ─────

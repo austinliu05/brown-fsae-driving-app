@@ -351,3 +351,8 @@ export const deleteDrivingDay = async (drivingDayId: string) => {
     return { status: axiosError.status };
   }
 };
+
+export const getAllPackingLists = async () => {
+  const path = "all-packing-lists";
+  return await getRequest(path, new URLSearchParams());
+};

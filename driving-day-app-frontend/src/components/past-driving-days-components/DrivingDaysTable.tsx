@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DrivingDay, PackingListEntry, MOCK_PACKING_LISTS } from "../../utils/DataTypes";
-import { getAllDrivingDays } from "../../api/api";
+import { DrivingDay, PackingListEntry} from "../../utils/DataTypes";
+import { getAllDrivingDays, getAllPackingLists } from "../../api/api";
 
 function mapDrivingDay(raw: any): DrivingDay {
   return {
@@ -17,6 +17,7 @@ function mapDrivingDay(raw: any): DrivingDay {
     })),
     issueIds: raw.issue_ids ?? [],
     feedback: raw.feedback ?? [],
+    
   };
 }
 
@@ -24,6 +25,23 @@ export default function DrivingDaysTable() {
   const navigate = useNavigate();
   const [drivingDays, setDrivingDays] = useState<DrivingDay[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [packingLists, setPackingLists] = useState<any[]>([]);
+
+  
+  useEffect(() => {
+    const fetchPackingLists = async () => {
+      try {
+        const response = await getAllPackingLists();
+        if (response.data?.packing_lists) {
+          setPackingLists(response.data.packing_lists);
+        }
+      } catch (err) {
+        console.error("Failed to fetch packing lists:", err);
+      }
+    };
+  
+    fetchPackingLists();
+  }, []);
 
   useEffect(() => {
     const fetchDrivingDays = async () => {
@@ -112,7 +130,7 @@ export default function DrivingDaysTable() {
                 <td className="hidden md:table-cell px-6 py-4 sm:py-3">
                   <div className="flex flex-wrap gap-1">
                     {day.packingLists.map((entry) => {
-                      const pl = MOCK_PACKING_LISTS.find((p) => p.id === entry.packingListId);
+                      const pl = packingLists.find((p) => p.id === entry.packingListId);
                       const totalItems = pl?.items.length ?? 0;
                       const checkedCount = entry.checkedItems.length;
                       return (

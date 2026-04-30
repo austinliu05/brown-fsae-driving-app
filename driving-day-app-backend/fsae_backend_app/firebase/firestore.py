@@ -612,3 +612,30 @@ def delete_driving_day(driving_day_id: str):
     except Exception as e:
         print(f"An unexpected error occurred while deleting driving day: {e}")
         return None
+    
+def get_all_packing_lists():
+    """
+    Retrieves all packing lists from the 'packing_lists' collection 
+
+    Returns:
+        list: List of dictionaries containing packing list data
+        None: If an error occurs.
+    """
+    try:
+        main_db = db.collection('packing_lists')
+        query = main_db.order_by('created_at', direction=firestore.Query.DESCENDING)
+    
+        
+        docs = query.stream()
+        
+        packing_lists = []
+        for doc in docs:
+            packing_lists_data = doc.to_dict()
+            packing_lists_data['id'] = doc.id
+            packing_lists.append(packing_lists_data)
+                        
+        return packing_lists
+    
+    except Exception as e:
+        print(f"An error occurred while retrieving packing lists: {e}")
+        return None

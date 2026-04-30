@@ -489,6 +489,20 @@ async def get_all_driving_days_call(request):
         return JsonResponse({
             "error": f"An unexpected error occurred: {str(e)}"
         }, status=500)
+
+
+@require_GET
+async def get_all_packing_lists_call(request):
+    try:
+        packing_lists = await sync_to_async(get_all_packing_lists)()
+
+
+        return JsonResponse({
+            "packing_lists" : packing_lists
+        }, status=200)
+    
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
     
 @csrf_exempt
 async def update_driving_day_call(request, driving_day_id):

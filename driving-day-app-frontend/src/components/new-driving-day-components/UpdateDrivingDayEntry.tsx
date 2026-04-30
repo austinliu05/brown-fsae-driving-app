@@ -1,14 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Issue, DrivingDay, MOCK_PACKING_LISTS } from "../../utils/DataTypes";
+import { Issue, DrivingDay } from "../../utils/DataTypes";
 import { Driver } from "../../utils/DriverType";
-import { getAllIssues, updateDrivingDay, deleteDrivingDay } from "../../api/api";
+import { getAllIssues, updateDrivingDay, deleteDrivingDay, getAllPackingLists } from "../../api/api";
 
 export default function UpdateDrivingDayEntry() {
   const navigate = useNavigate();
   const location = useLocation();
   const drivingDay = location.state?.drivingDay as DrivingDay | undefined;
 
+  //packing list type
+  type PackingList = {
+    id: string;
+    name: string;
+    description?: string;
+    items: string[];
+  };
+  
   // Form fields
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
@@ -21,7 +29,7 @@ export default function UpdateDrivingDayEntry() {
   const [backendIssues, setBackendIssues] = useState<Issue[]>([]);
 
   // Packing lists
-  const availablePackingLists = MOCK_PACKING_LISTS;
+  const [availablePackingLists, setAvailablePackingLists] = useState<PackingList[]>([]);
   const [addedPackingListIds, setAddedPackingListIds] = useState<string[]>([]);
   const [expandedListIds, setExpandedListIds] = useState<Set<string>>(new Set());
   const [checkedItems, setCheckedItems] = useState<Record<string, Set<number>>>({});
@@ -90,6 +98,26 @@ export default function UpdateDrivingDayEntry() {
     };
     fetchIssues();
   }, [drivingDay]);
+
+  //get packing lists
+  useEffect(() => {
+    const fetchPackingLists = async () => {
+      try {
+        const response = await getAllPackingLists();
+  
+        console.log("UPDATE PAGE PACKING LISTS:", response.data);
+  
+        if (response.data?.packing_lists) {
+          setAvailablePackingLists(response.data.packing_lists);
+        }
+      } catch (err) {
+        console.error("Failed to fetch packing lists:", err);
+      }
+    };
+  
+    fetchPackingLists();
+  }, []);
+  
 
   // ── Packing list handlers ─────
 
