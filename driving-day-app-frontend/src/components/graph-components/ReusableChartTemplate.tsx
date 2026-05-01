@@ -3,7 +3,7 @@ import { Chart } from 'react-chartjs-2';
 import {
   Chart as ChartJS, registerables
 } from 'chart.js';
-import { ReusableChartProps } from '../../utils/DataTypes';
+import { ReusableChartProps } from '../../types/Chart';
 import ChartContext from '../../components/contexts/ChartContext';
 
 // Register necessary components from Chart.js

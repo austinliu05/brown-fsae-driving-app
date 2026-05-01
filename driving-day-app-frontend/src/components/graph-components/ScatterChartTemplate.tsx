@@ -1,5 +1,5 @@
 import React from 'react';
-import { StandardChartProps } from '../../utils/DataTypes';
+import { StandardChartProps } from '../../types/Chart';
 import ReusableChartTemplate from './ReusableChartTemplate';
 
 // Register necessary components from Chart.js

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Modal from "../shared/Modal";
 import DatePicker from "react-datepicker";
 import { updateFeedback, deleteFeedback } from "../../api/api";
-import { Feedback, ResponseValue } from "../../utils/DataTypes";
+import { Feedback, ResponseValue } from "../../types/Feedback";
 import { questionList, pages, pageTitles } from "./AddFeedbackModal";
 import { QuestionField, toggleMulti, normalizeDateInput, formatMultiDisplay, toISODate } from '../../utils/feedbackHelpers';
 

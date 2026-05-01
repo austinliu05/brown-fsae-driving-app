@@ -752,8 +752,6 @@ async def delete_driving_day_call(request, driving_day_id):
             
             if result is None:
                 return JsonResponse({"error": "Failed to delete driving day or driving day not found"}, status=404)
-
-            await sync_to_async(delete_s3_folder)(f"driving-days/{driving_day_id}/")
         
             return JsonResponse({
                 "message": "Driving day deleted successfully!",

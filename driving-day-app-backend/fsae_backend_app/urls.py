@@ -36,5 +36,4 @@ urlpatterns = [
     path('feedback-paginated', get_feedback_paginated_call, name='get-feedback-paginated'),
     path('get-csrf-token', get_csrf_token, name='get-csrf-token'),
     path('get-all-driving-days', get_all_driving_days_call, name='all-driving-days'),
-    path('all-packing-lists', get_all_packing_lists_call, name='all-packing-lists'),
-]
+path('get-all-packing-lists', get_all_packing_lists_call, name='get-all-packing-lists'),]

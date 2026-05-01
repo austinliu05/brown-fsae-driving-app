@@ -1,5 +1,6 @@
 import React from 'react';
-import { ResponseValue, QType } from './DataTypes';
+import { ResponseValue} from '../types/Feedback';
+import { QType } from '../types/Feedback';
 
 export interface Question {
   key: string;

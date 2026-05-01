@@ -5,7 +5,7 @@ import SpecificRunBubble from '../../components/run-components/SpecificRunBubble
 import PageBase from '../../components/base-components/PageBase';
 import './ChartElements.css';
 import { getSpecificRunDataPaginated } from '../../api/api';
-import { StandardChartProps } from '../../utils/DataTypes';
+import { StandardChartProps } from '../../types/Chart';
 import { CHARTS, ChartCategory } from '../../utils/ChartTypes';
 import Pagination from '../../components/pagination-components/Pagination';
 

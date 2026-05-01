@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { PackingList, DrivingDay, PackingListEntry } from "../../utils/DataTypes";
+import { PackingList, PackingListEntry } from "../../types/PackingList";
 import { getAllDrivingDays, getAllPackingLists } from "../../api/api";
+import { DrivingDay } from "../../types/DrivingDay";
 
 function mapPackingList(raw: any): PackingList {
   return {

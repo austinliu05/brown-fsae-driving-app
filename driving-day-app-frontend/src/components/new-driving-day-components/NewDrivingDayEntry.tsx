@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Issue } from "../../utils/DataTypes";
-import { PackingList, getDefaultPackingListIds, sortPackingListsForDisplay } from "../../utils/DataTypes";
+import { Issue } from "../../types/Issues";
+import { PackingList } from "../../types/PackingList";
+import { getDefaultPackingListIds, sortPackingListsForDisplay } from "../../utils/PackingUtils";
 import { getAllIssues, postDrivingDay, getAllPackingLists } from "../../api/api";
 function mapPackingList(raw: any): PackingList {
   return {

@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import './AddFeedbackModal.css'
 import DatePicker from "react-datepicker";
 import { postFeedback } from '../../api/api';
-import { ResponseValue, Feedback, QType } from "../../utils/DataTypes";
+import { Feedback } from "../../types/Feedback";
+import { ResponseValue, QType } from "../../types/Feedback";
 import { QuestionField, toggleMulti, normalizeDateInput, toISODate } from '../../utils/feedbackHelpers';
 import Modal from "../shared/Modal";
 import feedbackQuestionsData from '../../constants/feedbackQuestions.json';

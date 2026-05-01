@@ -1,4 +1,4 @@
-import { StandardChartProps } from '../../utils/DataTypes';
+import { StandardChartProps } from '../../types/Chart';
 import { createContext } from 'react';
 
 interface ChartContextType {

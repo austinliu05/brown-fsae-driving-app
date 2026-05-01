@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import Modal from "../shared/Modal";
 import { updateIssue, deleteIssue } from "../../api/api";
 import { availableSubsystems, priorityLevels, statusOptions } from "../../constants/IssuesConstants";
-import { Issue } from "../../utils/DataTypes";
+import { Issue } from "../../types/Issues";
 import AppDataContext from '../contexts/AppDataContext';
 
 interface IssueModalProps {

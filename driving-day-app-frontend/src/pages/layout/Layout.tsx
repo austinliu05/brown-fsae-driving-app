@@ -8,7 +8,7 @@ import AppDataContext from "../../components/contexts/AppDataContext";
 import ChartContext from "../../components/contexts/ChartContext";
 import LineChartTemplate from '../../components/graph-components/LineChartTemplate';
 import ScatterChartTemplate from '../../components/graph-components/ScatterChartTemplate';
-import { CATEGORIES, StandardChartProps } from "../../utils/DataTypes";
+import { CATEGORIES, StandardChartProps } from "../../types/Chart";
 import { auth } from '../../api/firebaseConfig'; 
 
 const chartMapping: { [key: number]: React.FC<StandardChartProps> } = {
