@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Issue} from "../../utils/DataTypes";
-import { Driver } from "../../utils/DriverType";
+import { Issue } from "../../utils/DataTypes";
+import { PackingList, getDefaultPackingListIds, sortPackingListsForDisplay } from "../../utils/DataTypes";
 import { getAllIssues, postDrivingDay, getAllPackingLists } from "../../api/api";
+function mapPackingList(raw: any): PackingList {
+  return {
+    id: raw.id,
+    name: raw.name ?? "",
+    description: raw.description ?? "",
+    items: raw.items ?? [],
+    category: raw.category ?? "Subsystems",
+    order: raw.order ?? 0,
+  };
+}
 
 export default function NewDrivingDayEntry() {
   const navigate = useNavigate();
   const today = new Date().toISOString().split("T")[0];
-
-  //packing list type 
-  type PackingList = {
-    id: string;
-    name: string;
-    description?: string;
-    items: string[];
-  };
 
   // Form fields
   const [title, setTitle] = useState("");
@@ -25,6 +27,11 @@ export default function NewDrivingDayEntry() {
 
   // Backend issues
   const [backendIssues, setBackendIssues] = useState<Issue[]>([]);
+
+  // Selected issue IDs
+  const [linkedIssueIds, setLinkedIssueIds] = useState<string[]>([]);
+  // UI state for the dropdown
+  const [isIssueDropdownOpen, setIsIssueDropdownOpen] = useState(false);
 
   // Packing lists — multiple can be added
   const [availablePackingLists, setAvailablePackingLists] = useState<PackingList[]>([]);
@@ -49,6 +56,12 @@ export default function NewDrivingDayEntry() {
     setCheckedItems((prev) => { const c = { ...prev }; delete c[listId]; return c; });
   };
 
+  const toggleIssue = (issueId: string) => {
+    setLinkedIssueIds((prev) =>
+      prev.includes(issueId) ? prev.filter((id) => id !== issueId) : [...prev, issueId]
+    );
+  };
+
   const toggleAccordion = (listId: string) => {
     setExpandedListIds((prev) => {
       const s = new Set(prev);
@@ -66,16 +79,9 @@ export default function NewDrivingDayEntry() {
   };
 
   // Drivers
-  const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [selectedDriverIds, setSelectedDriverIds] = useState<string[]>([]);
+  const [selectedDrivers, setSelectedDrivers] = useState<string[]>([]);
   const [newDriverName, setNewDriverName] = useState("");
 
-  // Issues
-  const [linkedIssueIds, setLinkedIssueIds] = useState<string[]>([]);
-  const [isIssueDropdownOpen, setIsIssueDropdownOpen] = useState(false);
-
-
-  // Fetch issues from backend on mount
   useEffect(() => {
     const fetchIssues = async () => {
       try {
@@ -90,12 +96,65 @@ export default function NewDrivingDayEntry() {
     fetchIssues();
   }, []);
 
+  useEffect(() => {
+    const fetchIssues = async () => {
+      try {
+        const response = await getAllIssues();
+        if (response.data?.issues) {
+          setBackendIssues(response.data.issues);
+        }
+      } catch (err) {
+        console.error("Failed to fetch issues:", err);
+      }
+    };
+
+    fetchIssues();
+  }, []);
+
+  useEffect(() => {
+    const fetchPackingLists = async () => {
+      try {
+        const response = await getAllPackingLists();
+        if (response.data?.packing_lists) {
+          setAvailablePackingLists(sortPackingListsForDisplay(response.data.packing_lists.map(mapPackingList)));
+        }
+      } catch (err) {
+        console.error("Failed to fetch packing lists:", err);
+      }
+    };
+
+    fetchPackingLists();
+  }, []);
+
+  useEffect(() => {
+    if (availablePackingLists.length === 0) return;
+
+    const defaultPackingListIds = getDefaultPackingListIds(availablePackingLists);
+    if (defaultPackingListIds.length === 0) return;
+
+    setAddedPackingListIds((prev) => Array.from(new Set([...prev, ...defaultPackingListIds])));
+    setExpandedListIds((prev) => {
+      const next = new Set(prev);
+      defaultPackingListIds.forEach((listId) => next.add(listId));
+      return next;
+    });
+    setCheckedItems((prev) => {
+      const next = { ...prev };
+      defaultPackingListIds.forEach((listId) => {
+        if (!next[listId]) {
+          next[listId] = new Set<number>();
+        }
+      });
+      return next;
+    });
+  }, [availablePackingLists]);
+
   // Fetch packing listst from backend 
   useEffect(() => {
     const fetchPackingLists = async () => {
       try {
         const response = await getAllPackingLists();
-    
+
         if (response.data?.packing_lists) {
           setAvailablePackingLists(response.data.packing_lists);
         }
@@ -103,28 +162,24 @@ export default function NewDrivingDayEntry() {
         console.error("Failed to fetch packing lists:", err);
       }
     };
-  
+
     fetchPackingLists();
   }, []);
 
   // ── Handlers ─────
 
-  const toggleDriver = (driverId: string) => {
-    setSelectedDriverIds((prev) =>
-      prev.includes(driverId) ? prev.filter((id) => id !== driverId) : [...prev, driverId]
-    );
+  const removeDriver = (driverName: string) => {
+    setSelectedDrivers((prev) => prev.filter((name) => name !== driverName));
   };
 
-  const toggleIssue = (issueId: string) => {
-    setLinkedIssueIds((prev) =>
-      prev.includes(issueId) ? prev.filter((id) => id !== issueId) : [...prev, issueId]
-    );
+  const addDriver = () => {
+    const name = newDriverName.trim();
+    if (!name || selectedDrivers.includes(name)) return;
+    setSelectedDrivers((prev) => [...prev, name]);
+    setNewDriverName("");
   };
 
-  // Combine backend issues for lookups
-  const allIssues = [...backendIssues].sort(
-    (a, b) => b.issue_number - a.issue_number
-  );
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,10 +196,10 @@ export default function NewDrivingDayEntry() {
         title,
         date,
         description,
-        drivers: selectedDriverIds,
+        drivers: selectedDrivers, // Keep your new driver logic here
         packingLists: packingListEntries,
         issues: linkedIssueIds.map((id) => {
-          const issue = allIssues.find((i) => i.id === id);
+          const issue = backendIssues.find((i) => i.id === id);
           return issue?.issue_number ?? 0;
         }),
         feedback: [],
@@ -163,15 +218,6 @@ export default function NewDrivingDayEntry() {
   };
 
   // ── Helpers ────
-  const getPriorityColor = (priority: string) => {
-    switch (priority.toLowerCase()) {
-      case "low": return "bg-green-100 text-green-800";
-      case "medium": return "bg-yellow-600 text-white";
-      case "high": return "bg-red-100 text-red-800";
-      case "critical": return "bg-red-800 text-white";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -349,60 +395,41 @@ export default function NewDrivingDayEntry() {
 
         {/* Add driver input */}
         <div className="mb-3 flex gap-2">
-            <input
-              type="text"
-              value={newDriverName}
-              onChange={(e) => setNewDriverName(e.target.value)}
-              placeholder="Add driver name"
-              className="flex-1 border rounded p-2 text-sm"
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), (() => {
-                const name = newDriverName.trim();
-                if (!name) return;
-                const parts = name.split(/\s+/);
-                const firstName = parts[0];
-                const lastName = parts.slice(1).join(' ') || '';
-                const newId = `d_${Date.now().toString(36)}`;
-                const newDriver: Driver = { driverId: newId, firstName, lastName, height: 0, weight: 0, pedalBoxPos: 0 };
-                setDrivers((prev) => [...prev, newDriver]);
-                setSelectedDriverIds((prev) => [...prev, newId]);
-                setNewDriverName('');
-              })())}
-            />
-            <button
-              type="button"
-              onClick={() => {
-                const name = newDriverName.trim();
-                if (!name) return;
-                const parts = name.split(/\s+/);
-                const firstName = parts[0];
-                const lastName = parts.slice(1).join(' ') || '';
-                const newId = `d_${Date.now().toString(36)}`;
-                const newDriver: Driver = { driverId: newId, firstName, lastName, height: 0, weight: 0, pedalBoxPos: 0 };
-                setDrivers((prev) => [...prev, newDriver]);
-                setSelectedDriverIds((prev) => [...prev, newId]);
-                setNewDriverName('');
-              }}
-              className="px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600"
-            >
-              Add
-            </button>
+          <input
+            type="text"
+            value={newDriverName}
+            onChange={(e) => setNewDriverName(e.target.value)}
+            placeholder="Add driver name"
+            className="flex-1 border rounded p-2 text-sm"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addDriver();
+              }
+            }}
+          />
+          <button
+            type="button"
+            onClick={addDriver}
+            className="px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600"
+          >
+            Add
+          </button>
         </div>
 
         {/* Selected driver chips */}
         <div className="flex gap-2 flex-wrap">
-          {selectedDriverIds.map((id) => {
-            const d = drivers.find((dr) => dr.driverId === id);
-            if (!d) return null;
+          {selectedDrivers.map((name) => {
             return (
               <span
-                key={id}
+                key={name}
                 className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded flex items-center"
               >
-                {d.firstName} {d.lastName}
+                {name}
                 <button
                   type="button"
                   className="ml-1.5 text-blue-800 hover:text-blue-900"
-                  onClick={() => toggleDriver(id)}
+                  onClick={() => removeDriver(name)}
                 >
                   ×
                 </button>
@@ -412,103 +439,84 @@ export default function NewDrivingDayEntry() {
         </div>
       </div>
 
-      {/* ── Associated Issues */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Associated Issues</h2>
-        </div>
+            {/* Associated Issues*/}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 className="text-lg font-semibold mb-4">Associated Issues</h2>
 
-        {/* Dropdown selector */}
-        <div className="relative mb-3">
+        {/* DropDown */}
+        <div className="relative mb-6">
           <button
             type="button"
             onClick={() => setIsIssueDropdownOpen(!isIssueDropdownOpen)}
-            className="w-full border rounded p-2 text-left flex justify-between items-center"
+            className="w-full border rounded p-2 text-left flex justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
           >
             <span>
-              {linkedIssueIds.length > 0
-                ? `Linked (${linkedIssueIds.length})`
-                : "Link existing issues"}
+              {linkedIssueIds.length > 0 ? `Link issues (${linkedIssueIds.length} linked)` : "Link existing issues"}
             </span>
             <span>{isIssueDropdownOpen ? "▲" : "▼"}</span>
           </button>
+
           {isIssueDropdownOpen && (
-            <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow-lg max-h-60 overflow-y-auto">
-              {allIssues.map((issue) => (
+            <div className="absolute z-10 w-full mt-1 bg-white border rounded shadow-lg max-h-60 overflow-y-auto">
+              {backendIssues.map(issue => (
                 <div
                   key={issue.id}
-                  className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
                   onClick={() => toggleIssue(issue.id)}
+                  className="flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b last:border-0"
                 >
                   <input
                     type="checkbox"
                     checked={linkedIssueIds.includes(issue.id)}
-                    onChange={() => {}}
-                    className="mr-2"
+                    readOnly
+                    className="mr-3 h-4 w-4 text-blue-600 border-gray-300 rounded"
                   />
-                  <span className="font-medium mr-2">#{issue.issue_number}</span>
-                  <span className="text-gray-600 truncate">{issue.synopsis}</span>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <span className="font-medium text-sm text-gray-900">
+                        #{issue.issue_number}: {issue.synopsis}
+                      </span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${getStatusColor(issue.status)}`}>
+                        {issue.status}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Linked issues table */}
+        {/*The Summary Table  */}
         {linkedIssueIds.length > 0 && (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mt-3">
-            <table className="w-full font-face table-fixed">
-              <colgroup>
-                <col style={{ width: "10%" }} />
-                <col style={{ width: "30%" }} />
-                <col style={{ width: "20%" }} />
-                <col style={{ width: "15%" }} />
-                <col style={{ width: "15%" }} />
-                <col style={{ width: "10%" }} />
-              </colgroup>
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="px-4 py-3 text-left font-medium">#</th>
-                  <th className="px-4 py-3 text-left font-medium">Synopsis</th>
-                  <th className="px-4 py-3 text-left font-medium hidden sm:table-cell">Subsystems</th>
-                  <th className="px-4 py-3 text-left font-medium">Priority</th>
-                  <th className="px-4 py-3 text-left font-medium">Status</th>
-                  <th className="px-4 py-3 text-left font-medium"></th>
+          <div className="overflow-hidden border rounded-lg">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-gray-50 border-b text-gray-600 uppercase text-xs">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">#</th>
+                  <th className="px-4 py-3 font-semibold">Synopsis</th>
+                  <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 text-right"></th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-100">
                 {linkedIssueIds.map((id) => {
-                  const issue = allIssues.find((i) => i.id === id);
+                  const issue = backendIssues.find((i) => i.id === id);
                   if (!issue) return null;
                   return (
-                    <tr
-                      key={issue.id}
-                      className="odd:bg-white even:bg-blue-50 border-b border-gray-100"
-                    >
-                      <td className="px-4 py-3 font-medium">{issue.issue_number}</td>
-                      <td className="px-4 py-3 break-words">{issue.synopsis}</td>
-                      <td className="hidden sm:table-cell px-4 py-3">
-                        <div className="flex flex-wrap gap-1">
-                          {issue.subsystems.map((s) => (
-                            <span key={s} className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">{s}</span>
-                          ))}
-                        </div>
-                      </td>
+                    <tr key={issue.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 font-bold text-gray-700">{issue.issue_number}</td>
+                      <td className="px-4 py-3 text-gray-600 truncate max-w-[200px]">{issue.synopsis}</td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded ${getPriorityColor(issue.priority)}`}>
-                          {issue.priority}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded ${getStatusColor(issue.status)}`}>
+                        <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${getStatusColor(issue.status)}`}>
                           {issue.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-right">
                         <button
                           type="button"
                           onClick={() => toggleIssue(issue.id)}
-                          className="text-red-500 hover:text-red-700 text-sm"
+                          className="text-red-400 hover:text-red-600 transition-colors text-xl font-light px-2"
+                          title="Unlink Issue"
                         >
                           ×
                         </button>
@@ -521,6 +529,7 @@ export default function NewDrivingDayEntry() {
           </div>
         )}
       </div>
+
 
       <div className="flex justify-end gap-3">
         <button
@@ -540,5 +549,7 @@ export default function NewDrivingDayEntry() {
         </button>
       </div>
     </form>
+
   );
+
 }

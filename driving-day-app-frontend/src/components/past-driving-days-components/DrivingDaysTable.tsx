@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DrivingDay, PackingListEntry} from "../../utils/DataTypes";
+import { PackingList, DrivingDay, PackingListEntry } from "../../utils/DataTypes";
 import { getAllDrivingDays, getAllPackingLists } from "../../api/api";
+
+function mapPackingList(raw: any): PackingList {
+  return {
+    id: raw.id,
+    name: raw.name ?? "",
+    description: raw.description ?? "",
+    items: raw.items ?? [],
+    category: raw.category ?? "Subsystems",
+    order: raw.order ?? 0,
+  };
+}
 
 function mapDrivingDay(raw: any): DrivingDay {
   return {
@@ -10,24 +21,25 @@ function mapDrivingDay(raw: any): DrivingDay {
     title: raw.title ?? "",
     date: raw.date ?? "",
     description: raw.description ?? "",
+    drivers: raw.drivers ?? raw.driver_ids ?? [],
     driverIds: raw.driver_ids ?? [],
     packingLists: (raw.packing_lists ?? []).map((pl: any): PackingListEntry => ({
       packingListId: pl.packingListId ?? pl.packing_list_id ?? "",
       checkedItems: pl.checkedItems ?? pl.checked_items ?? [],
     })),
-    issueIds: raw.issue_ids ?? [],
     feedback: raw.feedback ?? [],
-    
+    issues: raw.issues ?? [],
+
   };
 }
 
 export default function DrivingDaysTable() {
   const navigate = useNavigate();
   const [drivingDays, setDrivingDays] = useState<DrivingDay[]>([]);
+  const [packingLists, setPackingLists] = useState<PackingList[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [packingLists, setPackingLists] = useState<any[]>([]);
 
-  
+
   useEffect(() => {
     const fetchPackingLists = async () => {
       try {
@@ -39,7 +51,7 @@ export default function DrivingDaysTable() {
         console.error("Failed to fetch packing lists:", err);
       }
     };
-  
+
     fetchPackingLists();
   }, []);
 
@@ -56,7 +68,20 @@ export default function DrivingDaysTable() {
         setIsLoading(false);
       }
     };
+
+    const fetchPackingLists = async () => {
+      try {
+        const response = await getAllPackingLists();
+        if (response.data?.packing_lists) {
+          setPackingLists(response.data.packing_lists.map(mapPackingList));
+        }
+      } catch (error) {
+        console.error("Failed to fetch packing lists:", error);
+      }
+    };
+
     fetchDrivingDays();
+    fetchPackingLists();
   }, []);
 
   return (
@@ -79,11 +104,11 @@ export default function DrivingDaysTable() {
               <th className="px-6 py-4 text-left font-medium hidden sm:table-cell">Drivers</th>
               <th className="px-6 py-4 text-left font-medium hidden md:table-cell">Packing Lists</th>
               <th className="px-6 py-4 text-left font-medium">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3"> 
                   <span className="hidden sm:inline">Issues</span>
                   <button
                     onClick={() => navigate("/new-driving-day")}
-                    className="ml-4 bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 focus:outline-none"
+                    className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 focus:outline-none transition-colors"
                   >
                     Add
                   </button>
@@ -117,12 +142,12 @@ export default function DrivingDaysTable() {
                 </td>
                 <td className="hidden sm:table-cell px-6 py-4 sm:py-3">
                   <div className="flex flex-wrap gap-1">
-                    {day.driverIds.map((driverId) => (
+                    {day.drivers.map((driverName) => (
                       <span
-                        key={driverId}
+                        key={driverName}
                         className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded"
                       >
-                        {driverId}
+                        {driverName}
                       </span>
                     ))}
                   </div>
@@ -145,9 +170,9 @@ export default function DrivingDaysTable() {
                   </div>
                 </td>
                 <td className="px-6 py-4 sm:py-3 text-gray-600">
-                  {day.issueIds.length > 0 ? (
+                  {day.issues && day.issues.length > 0 ? (
                     <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded">
-                      {day.issueIds.length}
+                      {day.issues.length}
                     </span>
                   ) : (
                     <span className="text-xs text-gray-400">—</span>

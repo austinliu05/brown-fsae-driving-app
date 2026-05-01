@@ -4,7 +4,7 @@ import AddIssueModal from "./AddIssueModal";
 import DropdownFilter from "../filter-components/DropdownFilter";
 import DriverFilter from "../filter-components/DriverFilter";
 import FiltersBase from "../base-components/FiltersBase";
-import { getAllIssues, getIssuesPaginated } from "../../api/api";
+import { getIssuesPaginated } from "../../api/api";
 import { availableSubsystems, priorityLevels, statusOptions } from "../../constants/IssuesConstants";
 import AppDataContext from '../contexts/AppDataContext';
 import Pagination from "../pagination-components/Pagination";
@@ -29,7 +29,7 @@ export default function IssueTable() {
   /**
    * useState hooks that store filter options
    */
-  const [driverIdFilt, setDriverIdFilt] = useState<string | null>(null);
+  const [, setDriverIdFilt] = useState<string | null>(null);
   const [subsystemFilt, setSubsystemFilt] = useState<string>("");
   const [priorityFilt, setPriorityFilt] = useState<string>("");
   const [statusFilt, setStatusFilt] = useState<string>("");
@@ -131,8 +131,7 @@ export default function IssueTable() {
   };
 
   useEffect(() => {
-    // fetchIssuesPaginated("", "")
-    handleSave()
+    handleSave();
   }, [subsystemFilt, priorityFilt, statusFilt]);
 
   return (
@@ -223,7 +222,7 @@ export default function IssueTable() {
 
                 {/* Driver (hidden on xs) */}
                 <td className="hidden sm:table-cell px-6 py-4 sm:py-3 text-gray-600">
-                  <div className="break-words">{issue.driver}</div>
+                  <div className="break-words">{issue.drivers}</div>
                 </td>
 
                 {/* Date */}
