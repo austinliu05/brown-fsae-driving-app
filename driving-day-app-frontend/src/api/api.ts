@@ -88,6 +88,17 @@ export const postIssue = async (issueData: {
   return await postRequest(path, issueData);
 };
 
+export const postPackingList = async (listData: {
+  name: string;
+  description: string;
+  items: string[];
+  category: string;
+  order?: number;
+}) => {
+  const path = "add-packing-list/";
+  return await postRequest(path, listData);
+};
+
 export const postFeedback = async (feedbackData: {
   driver: string;
   date: string;
@@ -327,6 +338,38 @@ export const deleteIssue = async (issueId: string) => {
   }
 };
 
+export const getAllPackingLists = async () => {
+  const path = "all-packing-lists";
+  return await getRequest(path, new URLSearchParams());
+};
+
+export const getPackingList = async (listId: string) => {
+  const path = "packing-list";
+  const params = new URLSearchParams({ listId });
+  return await getRequest(path, params);
+};
+
+export const updatePackingList = async (
+  listId: string,
+  listData: {
+    name?: string;
+    description?: string;
+    items?: string[];
+    category?: string;
+    order?: number;
+  }
+) => {
+  const path = `update-packing-list/${listId}/`;
+  try {
+    const response = await api.put(path, listData);
+    return response;
+  } catch (error) {
+    console.error(error);
+    const axiosError = error as AxiosError;
+    return { status: axiosError.status };
+  }
+};
+
 export const updateFeedback = async (
   feedbackId: string,
   feedbackData: {
@@ -338,6 +381,18 @@ export const updateFeedback = async (
   const path = `update-feedback/${feedbackId}/`;
   try {
     const response = await api.put(path, feedbackData);
+    return response;
+  } catch (error) {
+    console.error(error);
+    const axiosError = error as AxiosError;
+    return { status: axiosError.status };
+  }
+};
+
+export const deletePackingList = async (listId: string) => {
+  const path = `delete-packing-list/${listId}/`;
+  try {
+    const response = await api.delete(path);
     return response;
   } catch (error) {
     console.error(error);

@@ -4,7 +4,7 @@ import DatePicker from "react-datepicker";
 import { postFeedback } from '../../api/api';
 import { ResponseValue, Feedback, QType } from "../../utils/DataTypes";
 import { QuestionField, toggleMulti, normalizeDateInput, toISODate } from '../../utils/feedbackHelpers';
-import Modal from "../issues-components/Modal";
+import Modal from "../shared/Modal";
 import feedbackQuestionsData from '../../constants/feedbackQuestions.json';
 
 export const questionList: {
