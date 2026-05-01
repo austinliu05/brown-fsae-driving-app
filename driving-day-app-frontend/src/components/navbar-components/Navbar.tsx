@@ -48,6 +48,11 @@ const Navbar = () => {
           </Link>
         </li>
         <li>
+          <Link to="/past-driving-days" className="navbar-link">
+            Driving Days
+          </Link>
+        </li>
+        <li>
           <Link to="/issues" className="navbar-link">
             Issues
           </Link>

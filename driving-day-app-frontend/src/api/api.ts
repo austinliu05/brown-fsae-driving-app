@@ -1,6 +1,9 @@
 import axios from "axios";
 import { AxiosError } from "axios";
-import { DataCategory, ResponseValue } from "../utils/DataTypes";
+import exp from "constants";
+import { DataCategory} from "../types/Chart";
+import { ResponseValue } from "../types/Feedback";
+import { PackingListEntry } from "../types/PackingList";
 
 export const api = axios.create({
   baseURL: `${process.env.REACT_APP_BACKEND_URL}/api/`,
@@ -88,6 +91,19 @@ export const postIssue = async (issueData: {
   return await postRequest(path, issueData);
 };
 
+export const postDrivingDay = async (drivingDayData: {
+  title: string;
+  date: string;
+  description: string;
+  drivers: string[];
+  packingLists: PackingListEntry[];
+  issues: number[];
+  feedback: number[];
+}) => {
+  const path = "add-driving-day/";
+  return await postRequest(path, drivingDayData);
+};
+
 export const postPackingList = async (listData: {
   name: string;
   description: string;
@@ -109,6 +125,7 @@ export const postFeedback = async (feedbackData: {
 };
 
 
+
 /**
  *
  * @param path: Corresponds to the relative backend path to which the GET request is sent
@@ -121,6 +138,28 @@ export const getRequest = async (
 ) => {
   try {
     const response = await api.get(`${path}?${searchParams.toString()}`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    const axiosError = error as AxiosError;
+    return { status: axiosError.status, data: undefined };
+  }
+};
+
+export const putRequest = async (path: string, data: any) => {
+  try {
+    const response = await api.put(path, data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    const axiosError = error as AxiosError;
+    return { status: axiosError.status, data: undefined };
+  }
+};
+
+export const deleteRequest = async (path: string) => {
+  try {
+    const response = await api.delete(path);
     return response;
   } catch (error) {
     console.error(error);
@@ -258,6 +297,12 @@ export const getAllIssues = async (filters?: {
   return await getRequest(path, searchParams);
 };
 
+export const getAllDrivingDays = async () => {
+  const path = "get-all-driving-days";
+  const searchParams = new URLSearchParams();
+
+  return await getRequest(path, searchParams);
+};
 
 export const getIssuesPaginated = async (filters: {
   pageSize: number,
@@ -326,6 +371,10 @@ export const updateIssue = async (
   }
 };
 
+export const updateDrivingDay = async (drivingDayId: string, drivingDayData: any) => {
+  return await putRequest(`update-driving-day/${drivingDayId}/`, drivingDayData);
+};
+
 export const deleteIssue = async (issueId: string) => {
   const path = `delete-issue/${issueId}/`;
   try {
@@ -338,8 +387,12 @@ export const deleteIssue = async (issueId: string) => {
   }
 };
 
+export const deleteDrivingDay = async (drivingDayId: string) => {
+  return await deleteRequest(`delete-driving-day/${drivingDayId}/`);
+};
+
 export const getAllPackingLists = async () => {
-  const path = "all-packing-lists";
+  const path = "get-all-packing-lists";
   return await getRequest(path, new URLSearchParams());
 };
 

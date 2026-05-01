@@ -446,7 +446,6 @@ async def delete_issue_call(request, issue_id):
         
     return JsonResponse({"error": "Invalid request method. Use DELETE."}, status=400)
 
-
 @require_GET
 async def get_all_packing_lists_call(request):
     """
@@ -643,6 +642,120 @@ async def delete_feedback_call(request, feedback_id):
             return JsonResponse({
                 "message": "Feedback deleted successfully!",
                 "feedback_id": feedback_id
+            }, status=200)
+            
+        except Exception as e:
+            return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
+        
+    return JsonResponse({"error": "Invalid request method. Use DELETE."}, status=400)
+
+@require_POST
+@csrf_exempt
+async def add_driving_day_call(request):
+    """
+    Handles adding a new driving day via a POST request.
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        result = await sync_to_async(add_driving_day)(data)
+        
+        if result is None:
+            return JsonResponse({"error": "Failed to create driving day"}, status=400)
+            
+        return JsonResponse({
+            "message": "Driving day created successfully!",
+            "driving_day_id": result["driving_day_id"]
+        }, status=201)
+        
+    except Exception as e:
+        return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
+    
+
+@require_GET
+async def get_all_driving_days_call(request):
+    """
+    Retrieves all driving days with optional filtering.
+    """
+    try:
+        driving_days = await sync_to_async(get_all_driving_days)()
+        
+        if driving_days is None:
+            return JsonResponse({"error": "Failed to retrieve driving days"}, status=500)
+        
+        return JsonResponse({
+            "driving_days": driving_days,
+            "message": "Driving days retrieved successfully",
+            "count": len(driving_days)
+        }, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            "error": f"An unexpected error occurred: {str(e)}"
+        }, status=500)
+
+
+@require_GET
+async def get_all_packing_lists_call(request):
+    try:
+        packing_lists = await sync_to_async(get_all_packing_lists)()
+
+
+        return JsonResponse({
+            "packing_lists" : packing_lists
+        }, status=200)
+    
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    
+@csrf_exempt
+async def update_driving_day_call(request, driving_day_id):
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            result = await sync_to_async(update_driving_day)(driving_day_id, data)
+            
+            if result is None:
+                return JsonResponse({"error": "Failed to update driving day or driving day not found"}, status=400)
+                
+            return JsonResponse({
+                "message": "Driving day updated successfully!",
+                "driving_day_id": result["driving_day_id"]
+            }, status=200)
+            
+        except Exception as e:
+            return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
+        
+    return JsonResponse({"error": "Invalid request method. Use PUT."}, status=400)
+
+@csrf_exempt
+async def delete_driving_day_call(request, driving_day_id):
+    """
+    Handles deleting a driving day via a DELETE request.
+
+    This endpoint deletes an existing driving day from the database based on the provided driving_day_id.
+    It expects a DELETE request and returns a success message upon completion.
+
+    Args:
+        driving_day_id (str): The ID of the driving day to delete.
+
+    Methods:
+    - DELETE: Deletes the driving day with the specified ID.
+
+    Returns:
+    - JSON response with a success message if deletion is successful (status 200).
+    - JSON response with an error message if the request method is not DELETE (status 400)
+      or if an error occurs during deletion (status 500).
+    """
+    if request.method == 'DELETE':
+        try:
+            result = await sync_to_async(delete_driving_day)(driving_day_id)
+            
+            if result is None:
+                return JsonResponse({"error": "Failed to delete driving day or driving day not found"}, status=404)
+        
+            return JsonResponse({
+                "message": "Driving day deleted successfully!",
+                "driving_day_id": driving_day_id
             }, status=200)
             
         except Exception as e:

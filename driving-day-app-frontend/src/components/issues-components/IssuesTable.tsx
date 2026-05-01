@@ -8,7 +8,7 @@ import { getIssuesPaginated } from "../../api/api";
 import { availableSubsystems, priorityLevels, statusOptions } from "../../constants/IssuesConstants";
 import AppDataContext from '../contexts/AppDataContext';
 import Pagination from "../pagination-components/Pagination";
-import { Issue } from "../../utils/DataTypes";
+import { Issue } from "../../types/Issues";
 import { Stack } from "../../utils/CustomDataStructs";
 
 const globalPageSize = 20

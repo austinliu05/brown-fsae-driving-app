@@ -10,6 +10,9 @@ import HomePage from "./pages/home-page/HomePage";
 import DevPage from "./pages/dev-page/DevPage";
 import IssuesPage from "./pages/issues-page/IssuesPage";
 import MyAccountPage from "./pages/account-page/MyAccountPage";
+import NewDrivingDayPage from "./pages/new-driving-day-page/NewDrivingDayPage";
+import PastDrivingDaysPage from "./pages/past-driving-days-page/PastDrivingDaysPage";
+import UpdateDrivingDayPage from "./pages/update-driving-day-page/UpdateDrivingDayPage";
 import PackingListPage from "./pages/packing-list-page/PackingListPage";
 import FeedbackPage from "./pages/driver-feedback-page/FeedbackPage";
 
@@ -49,6 +52,17 @@ const router = createBrowserRouter([
       {
         path: "/issues",
         element: <IssuesPage />,
+      },
+      { path: "/new-driving-day",
+        element: <NewDrivingDayPage />,
+      },
+      {
+        path: "/past-driving-days",
+        element: <PastDrivingDaysPage />,
+      },
+      {
+        path: "/update-driving-day",
+        element: <UpdateDrivingDayPage />,
       },
       {
         path: "/packing-list",

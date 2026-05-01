@@ -3,7 +3,7 @@ import FeedbackModal from "./FeedbackModal";
 import AddFeedbackModal from "./AddFeedbackModal";
 import { getFeedbackPaginated, getAllFeedback } from "../../api/api";
 import Pagination from "../pagination-components/Pagination";
-import { Feedback } from "../../utils/DataTypes";
+import { Feedback } from "../../types/Feedback";
 import { Stack } from "../../utils/CustomDataStructs";
 import FiltersBase from "../base-components/FiltersBase";
 
