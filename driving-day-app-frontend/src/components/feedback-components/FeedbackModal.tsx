@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import Modal from "../issues-components/Modal";
+import Modal from "../shared/Modal";
 import DatePicker from "react-datepicker";
 import { updateFeedback, deleteFeedback } from "../../api/api";
 import { Feedback, ResponseValue } from "../../utils/DataTypes";
