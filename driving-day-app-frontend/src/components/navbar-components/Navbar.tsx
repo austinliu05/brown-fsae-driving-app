@@ -53,6 +53,10 @@ const Navbar = () => {
           </Link>
         </li>
         <li>
+          <Link to="/timer" className="navbar-link">
+            Lap Timer
+          </Link>
+        </li>
           <Link to="/feedback" className="navbar-link">
             Feedback
           </Link>

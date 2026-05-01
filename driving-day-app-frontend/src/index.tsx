@@ -10,6 +10,7 @@ import HomePage from "./pages/home-page/HomePage";
 import DevPage from "./pages/dev-page/DevPage";
 import IssuesPage from "./pages/issues-page/IssuesPage";
 import MyAccountPage from "./pages/account-page/MyAccountPage";
+import TimerPage from "./pages/timer-page/TimerPage";
 import PackingListPage from "./pages/packing-list-page/PackingListPage";
 import FeedbackPage from "./pages/driver-feedback-page/FeedbackPage";
 
@@ -51,9 +52,12 @@ const router = createBrowserRouter([
         element: <IssuesPage />,
       },
       {
+        path: "/timer",
+        element: <TimerPage />,
+      },
+      {
         path: "/packing-list",
         element: <PackingListPage />,
-
       },
       {
         path: "/feedback",
